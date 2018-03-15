@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContosoUniversityCore", "ContosoCore\ContosoUniversityCore.csproj", "{D37309EB-9B73-49B7-B9F1-9059724B3F1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContosoUniversityCore", "ContosoUniversityCore\ContosoUniversityCore.csproj", "{D37309EB-9B73-49B7-B9F1-9059724B3F1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContosoUniversityFull", "ContosoUniversityFull\ContosoUniversityFull.csproj", "{264E21D6-4024-4A53-B1BE-1CD42F3348FE}"
 EndProject
