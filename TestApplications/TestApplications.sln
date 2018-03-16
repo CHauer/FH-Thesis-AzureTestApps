@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContosoUniversityCore", "Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContosoUniversityFull", "ContosoUniversityFull\ContosoUniversityFull.csproj", "{264E21D6-4024-4A53-B1BE-1CD42F3348FE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PatternVersions", "PatternVersions", "{7F4B6E3E-F47F-4C21-8ACF-1AD81D6DFDB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
