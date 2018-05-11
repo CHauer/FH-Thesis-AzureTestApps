@@ -7,9 +7,10 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Reflection;
 using System.Linq;
-using ContosoUniversity.Logging;
 
-namespace ContosoUniversity.DAL
+using ContosoUniversityFull.Logging;
+
+namespace ContosoUniversityFull.DAL
 {
     public class SchoolInterceptorLogging : DbCommandInterceptor
     {

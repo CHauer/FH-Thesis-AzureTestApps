@@ -2,7 +2,7 @@ using System;
 
 using Unity;
 
-namespace ContosoUniversity
+namespace ContosoUniversityFull
 {
     /// <summary>
     /// Specifies the Unity configuration for the main container.

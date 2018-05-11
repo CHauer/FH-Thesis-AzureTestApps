@@ -6,11 +6,12 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using ContosoUniversity.DAL;
-using ContosoUniversity.Models;
 using System.Data.Entity.Infrastructure;
 
-namespace ContosoUniversity.Controllers
+using ContosoUniversityFull.DAL;
+using ContosoUniversityFull.Models;
+
+namespace ContosoUniversityFull.Controllers
 {
     public class CourseController : Controller
     {

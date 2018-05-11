@@ -6,16 +6,23 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using ContosoUniversity.DAL;
-using ContosoUniversity.Models;
+
 using PagedList;
 using System.Data.Entity.Infrastructure;
 
-namespace ContosoUniversity.Controllers
+using ContosoUniversityFull.DAL;
+using ContosoUniversityFull.Models;
+
+namespace ContosoUniversityFull.Controllers
 {
     public class StudentController : Controller
     {
-        private SchoolContext db = new SchoolContext();
+        private readonly SchoolContext db;
+
+        public StudentController(SchoolContext db)
+        {
+            this.db = db; 
+        }
 
         // GET: Student
         public ViewResult Index(string sortOrder, string currentFilter, string searchString, int? page)

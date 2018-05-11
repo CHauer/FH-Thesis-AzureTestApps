@@ -7,15 +7,21 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using ContosoUniversity.DAL;
-using ContosoUniversity.Models;
 using System.Data.Entity.Infrastructure;
 
-namespace ContosoUniversity.Controllers
+using ContosoUniversityFull.DAL;
+using ContosoUniversityFull.Models;
+
+namespace ContosoUniversityFull.Controllers
 {
     public class DepartmentController : Controller
     {
-        private SchoolContext db = new SchoolContext();
+        private readonly SchoolContext db;
+
+        public DepartmentController(SchoolContext db)
+        {
+            this.db = db;
+        }
 
         // GET: Department
         public async Task<ActionResult> Index()

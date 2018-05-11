@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ContosoUniversity.Models
+namespace ContosoUniversityFull.Models
 {
     public class Department
     {
@@ -27,6 +27,7 @@ namespace ContosoUniversity.Models
         public byte[] RowVersion { get; set; }
 
         public virtual Instructor Administrator { get; set; }
+
         public virtual ICollection<Course> Courses { get; set; }
     }
 }

@@ -11,6 +11,7 @@ namespace ContosoUniversityCore.Models
         [StringLength(50)]
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
+
         [Required]
         [StringLength(50, ErrorMessage = "First name cannot be longer than 50 characters.")]
         [Column("FirstName")]
@@ -25,5 +26,10 @@ namespace ContosoUniversityCore.Models
                 return LastName + ", " + FirstMidName;
             }
         }
+
+        [ForeignKey(nameof(UserPicture))]
+        public int? PictureID { get; set; }
+
+        public Picture UserPicture { get; set; }
     }
 }

@@ -1,7 +1,10 @@
-namespace ContosoUniversity.Migrations
+using ContosoUniversityFull.DAL;
+using ContosoUniversityFull.Models;
+
+namespace ContosoUniversityFull.Migrations
 {
-    using ContosoUniversity.Models;
-    using ContosoUniversity.DAL;
+    using ContosoUniversityFull.Models;
+    using ContosoUniversityFull.DAL;
     using System;
     using System.Collections.Generic;
     using System.Data.Entity;

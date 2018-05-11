@@ -3,10 +3,10 @@ using System.Web.Mvc;
 
 using Unity.AspNet.Mvc;
 
-[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(ContosoUniversity.UnityMvcActivator), nameof(ContosoUniversity.UnityMvcActivator.Start))]
-[assembly: WebActivatorEx.ApplicationShutdownMethod(typeof(ContosoUniversity.UnityMvcActivator), nameof(ContosoUniversity.UnityMvcActivator.Shutdown))]
+[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(ContosoUniversityFull.UnityMvcActivator), nameof(ContosoUniversityFull.UnityMvcActivator.Start))]
+[assembly: WebActivatorEx.ApplicationShutdownMethod(typeof(ContosoUniversityFull.UnityMvcActivator), nameof(ContosoUniversityFull.UnityMvcActivator.Shutdown))]
 
-namespace ContosoUniversity
+namespace ContosoUniversityFull
 {
     /// <summary>
     /// Provides the bootstrapping for integrating Unity with ASP.NET MVC.

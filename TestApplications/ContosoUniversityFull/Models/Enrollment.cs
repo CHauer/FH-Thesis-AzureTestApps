@@ -1,12 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ContosoUniversity.Models
+namespace ContosoUniversityFull.Models
 {
-    public enum Grade
-    {
-        A, B, C, D, F
-    }
-
     public class Enrollment
     {
         public int EnrollmentID { get; set; }
