@@ -26,7 +26,8 @@ namespace ContosoUniversityFull.DAL
                     .MapRightKey("InstructorID")
                     .ToTable("CourseInstructor"));
 
-            modelBuilder.Entity<Department>().MapToStoredProcedures();
+            // removed because direct access is more suited for pattern tests 
+            // modelBuilder.Entity<Department>().MapToStoredProcedures();
         }
     }
 }
