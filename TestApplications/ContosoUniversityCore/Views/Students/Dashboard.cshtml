@@ -1,0 +1,99 @@
+﻿@model ContosoUniversityCore.Models.SchoolViewModels.StudentDashboardViewModel
+
+@{
+    ViewData["Title"] = "Studend Dashboard";
+}
+
+<h2>Dashboard</h2>
+
+<div>
+    <h4>Student</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Student.LastName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Student.LastName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Student.FirstMidName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Student.FirstMidName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Student.EnrollmentDate)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Student.EnrollmentDate)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Student.Enrollments)
+        </dt>
+        <dd>
+            <table class="table">
+                <tr>
+                    <th>Course Title</th>
+                    <th>Grade</th>
+                </tr>
+                @foreach (var item in Model.Student.Enrollments)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Course.Title)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Grade)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </dd>
+    </dl>
+</div>
+<div>
+    <table class="table">
+        <tr>
+            <th>Course Title</th>
+            <th>Credits</th>
+        </tr>
+        @foreach (var item in Model.SuggestedCourses)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Credits)
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+
+<div>
+<table class="table">
+    <tr>
+        <th>Department</th>
+        <th>Credits</th>
+    </tr>
+    @foreach (var item in Model.StudentDepartments)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StartDate)
+            </td>
+        </tr>
+    }
+</table>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Student.ID">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+

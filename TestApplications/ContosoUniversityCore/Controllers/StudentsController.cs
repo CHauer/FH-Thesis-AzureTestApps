@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 using ContosoUniversityCore.Data;
 using ContosoUniversityCore.Models;
+using ContosoUniversityCore.Models.SchoolViewModels;
 
 namespace ContosoUniversityCore.Controllers
 {
@@ -226,6 +227,36 @@ namespace ContosoUniversityCore.Controllers
         private bool StudentExists(int id)
         {
             return _context.Students.Any(e => e.ID == id);
+        }
+
+        public async Task<IActionResult> Dashboard(int id)
+        {
+            StudentDashboardViewModel model = new StudentDashboardViewModel();
+
+            model.Student = await _context.Students
+                              .Include(s => s.Enrollments)
+                              .ThenInclude(e => e.Course)
+                              .AsNoTracking()
+                              .SingleOrDefaultAsync(m => m.ID == id);
+
+            model.SuggestedCourses = _context.Courses
+                .Where(c => c.Enrollments.All(e => e.StudentID != id))
+                .OrderBy(c => c.Enrollments.Count)
+                .Take(10)
+                .AsNoTracking().ToList();
+
+            var departmentIds = _context.Enrollments
+                .Where(e => e.StudentID == id)
+                .Select(e => e.Course.DepartmentID).Distinct();
+
+            model.StudentDepartments = _context.Departments.Where(d => departmentIds.Contains(d.DepartmentID)).AsNoTracking().ToList();
+
+            if (model.Student == null)
+            {
+                return NotFound();
+            }
+
+            return View(model);
         }
     }
 }
