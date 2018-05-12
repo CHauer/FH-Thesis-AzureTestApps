@@ -9,9 +9,12 @@ using System.Web.Mvc;
 
 using PagedList;
 using System.Data.Entity.Infrastructure;
+using System.IO;
+using System.Threading.Tasks;
 
 using ContosoUniversityFull.DAL;
 using ContosoUniversityFull.Models;
+using ContosoUniversityFull.Models.SchoolViewModels;
 
 namespace ContosoUniversityFull.Controllers
 {
@@ -21,7 +24,7 @@ namespace ContosoUniversityFull.Controllers
 
         public StudentController(SchoolContext db)
         {
-            this.db = db; 
+            this.db = db;
         }
 
         // GET: Student
@@ -65,7 +68,7 @@ namespace ContosoUniversityFull.Controllers
                     break;
             }
 
-            int pageSize = 3;
+            int pageSize = 100;
             int pageNumber = (page ?? 1);
             return View(students.ToPagedList(pageNumber, pageSize));
         }
@@ -199,6 +202,57 @@ namespace ContosoUniversityFull.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        public async Task<ActionResult> Dashboard(int id)
+        {
+            StudentDashboardViewModel model = new StudentDashboardViewModel();
+
+            model.Student = await db.Students
+                                .Include(s => s.Enrollments)
+                                .Include(s => s.Enrollments.Select(e => e.Course))
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(m => m.ID == id);
+
+            model.SuggestedCourses = db.Courses
+                .Where(c => c.Enrollments.All(e => e.StudentID != id))
+                .OrderBy(c => c.Enrollments.Count)
+                .Take(10)
+                .AsNoTracking().ToList();
+
+            var departmentIds = db.Enrollments
+                .Where(e => e.StudentID == id)
+                .Select(e => e.Course.DepartmentID).Distinct();
+
+            model.StudentDepartments = db.Departments
+                .Where(d => departmentIds.Contains(d.DepartmentID))
+                .AsNoTracking().ToList();
+
+            if (model.Student == null)
+            {
+                return new HttpNotFoundResult();
+            }
+
+            return View(model);
+        }
+
+        [ActionName("UserPicture")]
+        public FileResult GetUserPicture(int? id)
+        {
+            if (id == null)
+            { 
+                return File("/Content/UserImage.png", "image/png");
+            }
+
+            var picture = db.Pictures.FirstOrDefault(p => p.PictureID == id);
+
+            if (picture == null || picture.Data.Length == 0)
+            {
+                return File("/Content/UserImage.png", "image/png");
+            }
+
+            return File(picture.Data, "image/jpg");
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

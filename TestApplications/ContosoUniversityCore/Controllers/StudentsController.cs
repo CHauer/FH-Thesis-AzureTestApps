@@ -66,7 +66,7 @@ namespace ContosoUniversityCore.Controllers
                     break;
             }
 
-            int pageSize = 3;
+            int pageSize = 100;
             return View(await PaginatedList<Student>.CreateAsync(students.AsNoTracking(), page ?? 1, pageSize));
         }
         // GET: Students/Details/5
@@ -257,6 +257,24 @@ namespace ContosoUniversityCore.Controllers
             }
 
             return View(model);
+        }
+
+        [ActionName("UserPicture")]
+        public FileResult GetUserPicture(int? id)
+        {
+            if(id == null)
+            {
+                return File("/images/UserImage.png", "image/png");
+            }
+
+            var picture = _context.Pictures.FirstOrDefault(p => p.PictureID == id);
+
+            if (picture == null || picture.Data.Length == 0)
+            {
+                return File("/images/UserImage.png", "image/png");
+            }
+
+            return File(picture.Data, "image/jpg");
         }
     }
 }

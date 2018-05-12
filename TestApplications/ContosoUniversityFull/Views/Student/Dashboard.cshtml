@@ -1,7 +1,7 @@
-﻿@model ContosoUniversityCore.Models.SchoolViewModels.StudentDashboardViewModel
+﻿@model ContosoUniversityFull.Models.SchoolViewModels.StudentDashboardViewModel
 
 @{
-    ViewData["Title"] = "Studend Dashboard";
+    ViewBag.Title = "Student Dashboard";
 }
 
 <h2>Dashboard</h2>
@@ -18,18 +18,23 @@
                 <dt>
                     @Html.DisplayNameFor(model => model.Student.LastName)
                 </dt>
+
                 <dd>
                     @Html.DisplayFor(model => model.Student.LastName)
                 </dd>
+
                 <dt>
                     @Html.DisplayNameFor(model => model.Student.FirstMidName)
                 </dt>
+
                 <dd>
                     @Html.DisplayFor(model => model.Student.FirstMidName)
                 </dd>
+
                 <dt>
                     @Html.DisplayNameFor(model => model.Student.EnrollmentDate)
                 </dt>
+
                 <dd>
                     @Html.DisplayFor(model => model.Student.EnrollmentDate)
                 </dd>
@@ -37,6 +42,7 @@
         </div>
     </div>
 </div>
+
 <div class="row">
     <div class="col-md-6">
         <h4> @Html.DisplayNameFor(model => model.Student.Enrollments)</h4>
@@ -82,6 +88,7 @@
         </table>
     </div>
 </div>
+
 <div>
     <h4>Other interesting Courses</h4>
     <hr />
@@ -104,8 +111,9 @@
     </table>
 </div>
 
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Student.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
 
+
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Student.ID }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
