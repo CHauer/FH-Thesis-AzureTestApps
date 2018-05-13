@@ -16,6 +16,13 @@ using ContosoUniversityFull.DAL;
 using ContosoUniversityFull.Models;
 using ContosoUniversityFull.Models.SchoolViewModels;
 
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Transforms;
+using SixLabors.Primitives;
+
 namespace ContosoUniversityFull.Controllers
 {
     public class StudentController : Controller
@@ -73,7 +80,6 @@ namespace ContosoUniversityFull.Controllers
             return View(students.ToPagedList(pageNumber, pageSize));
         }
 
-
         // GET: Student/Details/5
         public ActionResult Details(int? id)
         {
@@ -100,12 +106,29 @@ namespace ContosoUniversityFull.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "LastName, FirstMidName, EnrollmentDate")]Student student)
+        public ActionResult Create([Bind(Include = "LastName, FirstMidName, EnrollmentDate")]Student student, HttpPostedFileBase picture)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
+                    if (picture != null && picture.ContentLength > 0)
+                    {
+                        var userPicture = new Picture()
+                        {
+                            ContentType = picture.ContentType
+                        };
+
+                        using (var reader = new BinaryReader(picture.InputStream))
+                        {
+                            userPicture.OriginalData = reader.ReadBytes(picture.ContentLength);
+                        }
+
+                        userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
+                        userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
+                        student.UserPicture = userPicture;
+                    }
+
                     db.Students.Add(student);
                     db.SaveChanges();
                     return RedirectToAction("Index");
@@ -119,6 +142,20 @@ namespace ContosoUniversityFull.Controllers
             return View(student);
         }
 
+        private byte[] GeneratePicture(byte[] inputData, int width, int height)
+        {
+            using (Image<Rgba32> image = Image.Load(inputData))
+            {
+                image.Mutate(x => x.Resize(new ResizeOptions() { Mode = ResizeMode.Crop, Size = new Size(width, height) }));
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    image.SaveAsJpeg(memoryStream);
+                    return memoryStream.ToArray();
+                }
+            }
+
+        }
 
         // GET: Student/Edit/5
         public ActionResult Edit(int? id)
@@ -239,7 +276,7 @@ namespace ContosoUniversityFull.Controllers
         public FileResult GetUserPicture(int? id)
         {
             if (id == null)
-            { 
+            {
                 return File("/Content/UserImage.png", "image/png");
             }
 

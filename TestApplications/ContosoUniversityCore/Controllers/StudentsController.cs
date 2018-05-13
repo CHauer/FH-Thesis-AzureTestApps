@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversityCore.Data;
 using ContosoUniversityCore.Models;
 using ContosoUniversityCore.Models.SchoolViewModels;
+
+using Microsoft.AspNetCore.Http;
+
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Transforms;
+using SixLabors.Primitives;
 
 namespace ContosoUniversityCore.Controllers
 {
@@ -103,12 +112,30 @@ namespace ContosoUniversityCore.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("EnrollmentDate,FirstMidName,LastName")] Student student)
+            [Bind("EnrollmentDate,FirstMidName,LastName")] Student student, IFormFile picture)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
+                    if(picture != null && picture.Length > 0)
+                    {
+                        var userPicture = new Picture()
+                        {
+                            ContentType = picture.ContentType
+                        };
+
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await picture.CopyToAsync(memoryStream);
+                            userPicture.OriginalData = memoryStream.ToArray();
+                        }
+                        userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
+                        userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
+
+                        student.UserPicture = userPicture;
+                    }
+
                     _context.Add(student);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -122,6 +149,21 @@ namespace ContosoUniversityCore.Controllers
                     "see your system administrator.");
             }
             return View(student);
+        }
+
+        private byte[] GeneratePicture(byte[] inputData, int width, int height)
+        {
+            using (Image<Rgba32> image = Image.Load(inputData))
+            {
+                image.Mutate(x => x.Resize(new ResizeOptions() { Mode = ResizeMode.Crop, Size = new Size(width, height) }));
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    image.SaveAsJpeg(memoryStream);
+                    return memoryStream.ToArray();
+                }
+            }
+
         }
 
         // GET: Students/Edit/5

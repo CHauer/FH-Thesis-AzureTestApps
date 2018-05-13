@@ -9,6 +9,8 @@ namespace ContosoUniversityCore.Models
     {
         public int PictureID { get; set; }
 
+        public string ContentType { get; set; }
+
         public byte[] OriginalData { get; set; }
 
         public byte[] Data { get; set; }

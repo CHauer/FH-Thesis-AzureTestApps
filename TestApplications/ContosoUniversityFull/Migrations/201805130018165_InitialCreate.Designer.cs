@@ -6,14 +6,14 @@ namespace ContosoUniversityFull.Migrations
     using System.Data.Entity.Migrations.Infrastructure;
     using System.Resources;
     
-    [GeneratedCode("EntityFramework.Migrations", "6.1.1-30610")]
+    [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
     public sealed partial class InitialCreate : IMigrationMetadata
     {
         private readonly ResourceManager Resources = new ResourceManager(typeof(InitialCreate));
         
         string IMigrationMetadata.Id
         {
-            get { return "201805112341028_InitialCreate"; }
+            get { return "201805130018165_InitialCreate"; }
         }
         
         string IMigrationMetadata.Source

@@ -13,14 +13,14 @@ using System;
 namespace ContosoUniversityCore.Migrations
 {
     [DbContext(typeof(SchoolContext))]
-    [Migration("20180511234524_InitalCreate")]
-    partial class InitalCreate
+    [Migration("20180513001846_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.0-rtm-26452")
+                .HasAnnotation("ProductVersion", "2.0.3-rtm-10026")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("ContosoUniversityCore.Models.Course", b =>
@@ -144,6 +144,8 @@ namespace ContosoUniversityCore.Migrations
                 {
                     b.Property<int>("PictureID")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ContentType");
 
                     b.Property<byte[]>("Data");
 

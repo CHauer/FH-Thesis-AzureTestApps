@@ -67,6 +67,7 @@ namespace ContosoUniversityFull.Migrations
                 c => new
                     {
                         PictureID = c.Int(nullable: false, identity: true),
+                        ContentType = c.String(),
                         OriginalData = c.Binary(),
                         Data = c.Binary(),
                         ThumbnailData = c.Binary(),
