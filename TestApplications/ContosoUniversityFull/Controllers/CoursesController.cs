@@ -10,14 +10,15 @@ using System.Data.Entity.Infrastructure;
 
 using ContosoUniversityFull.DAL;
 using ContosoUniversityFull.Models;
+using ContosoUniversityFull.ViewModels;
 
 namespace ContosoUniversityFull.Controllers
 {
-    public class CourseController : Controller
+    public class CoursesController : Controller
     {
         private SchoolContext db;
 
-        public CourseController(SchoolContext db)
+        public CoursesController(SchoolContext db)
         {
             this.db = db;
         }
@@ -38,18 +39,29 @@ namespace ContosoUniversityFull.Controllers
         }
 
         // GET: Course/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int? id, int? studentId)
         {
+            ViewBag.StudentId = studentId;
+
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Course course = db.Courses.Find(id);
-            if (course == null)
+
+            CourseDetailsViewModel model = new CourseDetailsViewModel();
+
+            model.Course = db.Courses.Find(id);
+
+            if (model.Course == null)
             {
                 return HttpNotFound();
             }
-            return View(course);
+
+            model.OtherCourses = db.Courses
+                .Where(c => c.CourseID != id && c.DepartmentID == model.Course.DepartmentID)
+                .ToList();
+
+            return View(model);
         }
 
 

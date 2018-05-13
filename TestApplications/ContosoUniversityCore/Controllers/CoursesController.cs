@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 using ContosoUniversityCore.Data;
 using ContosoUniversityCore.Models;
+using ContosoUniversityCore.Models.SchoolViewModels;
 
 namespace ContosoUniversityCore.Controllers
 {
@@ -30,23 +31,32 @@ namespace ContosoUniversityCore.Controllers
         }
 
         // GET: Courses/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, int? studentId)
         {
+            ViewBag.StudentId = studentId;
+
             if (id == null)
             {
                 return NotFound();
             }
 
-            var course = await _context.Courses
+            CourseDetailsViewModel model = new CourseDetailsViewModel(); 
+
+            model.Course = await _context.Courses
                 .Include(c => c.Department)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(m => m.CourseID == id);
-            if (course == null)
+
+            if (model.Course == null)
             {
                 return NotFound();
             }
 
-            return View(course);
+            model.OtherCourses = _context.Courses
+                .Where(c => c.CourseID != id && c.DepartmentID == model.Course.DepartmentID)
+                .ToList();
+
+            return View(model);
         }
 
         // GET: Courses/Create

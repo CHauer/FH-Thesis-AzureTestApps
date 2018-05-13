@@ -89,6 +89,7 @@
         <tr>
             <th>Course Title</th>
             <th>Credits</th>
+            <th></th>
         </tr>
         @foreach (var item in Model.SuggestedCourses)
         {
@@ -98,6 +99,9 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Credits)
+                </td>
+                <td>
+                    @Html.ActionLink("Details", "Details", "Courses", new { id = item.CourseID, studentId = Model.Student.ID }, null)
                 </td>
             </tr>
         }
