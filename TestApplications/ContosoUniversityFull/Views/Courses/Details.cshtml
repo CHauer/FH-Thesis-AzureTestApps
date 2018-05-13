@@ -6,6 +6,12 @@
 
 <h2>Details</h2>
 
+@if (TempData.ContainsKey("Success"))
+{
+    <span class="success">@TempData["Success"]</span>
+}
+
+
 <div>
     <h4>Course</h4>
     <hr />
@@ -44,6 +50,27 @@
 
     </dl>
 </div>
+@if (ViewBag.StudentId != null)
+{
+    <div class="row">
+        @using (Html.BeginForm("Enroll", "Courses", FormMethod.Post, null))
+        {
+            @Html.AntiForgeryToken()
+            int studentId = ViewBag.StudentId;
+
+            @Html.Hidden("courseId", Model.Course.CourseID)
+            @Html.Hidden("studentId", studentId)
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Enroll for Course" class="btn btn-default" />
+                </div>
+            </div>
+
+        }
+    </div>
+}
+
 <div>
     <h4>Other interesting Courses</h4>
     <hr />

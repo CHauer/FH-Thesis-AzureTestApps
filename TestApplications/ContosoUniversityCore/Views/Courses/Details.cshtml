@@ -6,6 +6,11 @@
 
 <h2>Details</h2>
 
+@if (TempData.ContainsKey("Success"))
+{
+    <span class="success">@TempData["Success"]</span>
+}
+
 <div>
     <h4>Course</h4>
     <hr />
@@ -36,6 +41,18 @@
         </dd>
     </dl>
 </div>
+@if (ViewBag.StudentId != null)
+{
+    <div class="row">
+        <form asp-action="Enroll" method="post">
+            <input type="hidden" name="studentId" value="@ViewBag.StudentId" />
+            <input type="hidden" name="courseId" value="@Model.Course.CourseID" />
+            <div class="form-group">
+                <input type="submit" value="Enroll for Course" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+}
 <div>
     <h4>Other interesting Courses</h4>
     <hr />

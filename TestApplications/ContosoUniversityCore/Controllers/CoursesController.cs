@@ -40,7 +40,7 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            CourseDetailsViewModel model = new CourseDetailsViewModel(); 
+            CourseDetailsViewModel model = new CourseDetailsViewModel();
 
             model.Course = await _context.Courses
                 .Include(c => c.Department)
@@ -187,6 +187,24 @@ namespace ContosoUniversityCore.Controllers
                         parameters: multiplier);
             }
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Enroll(int courseId, int studentId)
+        {
+            if (ModelState.IsValid)
+            {
+                if (!_context.Enrollments.Any(e => e.CourseID == courseId && e.StudentID == studentId))
+                {
+                    var newEnrollment = new Enrollment() { CourseID = courseId, StudentID = studentId };
+
+                    _context.Enrollments.Add(newEnrollment);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = $"Student successfully enrolled for Couse.";
+                }
+            }
+            return RedirectToAction(nameof(Details), new { id = courseId, studentId });
         }
 
         private bool CourseExists(int id)

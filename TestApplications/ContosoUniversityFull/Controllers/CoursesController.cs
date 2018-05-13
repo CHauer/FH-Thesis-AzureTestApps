@@ -186,6 +186,24 @@ namespace ContosoUniversityFull.Controllers
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Enroll(int courseId, int studentId)
+        {
+            if (ModelState.IsValid)
+            {
+                if (!db.Enrollments.Any(e => e.CourseID == courseId && e.StudentID == studentId))
+                {
+                    var newEnrollment = new Enrollment() { CourseID = courseId, StudentID = studentId };
+
+                    db.Enrollments.Add(newEnrollment);
+                    db.SaveChanges();
+                    TempData["Success"] = $"Student successfully enrolled for Couse.";
+                }
+            }
+            return RedirectToAction(nameof(Details), new { id = courseId, studentId });
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

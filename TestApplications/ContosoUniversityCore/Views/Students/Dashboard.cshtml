@@ -55,6 +55,9 @@
                     <td>
                         @Html.DisplayFor(modelItem => item.Grade)
                     </td>
+                    <td>
+                        @Html.ActionLink("Details", "Details", "Courses", new { id = item.CourseID, studentId = Model.Student.ID }, null)
+                    </td>
                 </tr>
             }
         </table>

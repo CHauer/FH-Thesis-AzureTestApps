@@ -12,6 +12,11 @@ namespace ContosoUniversityFull.DAL
     {
         protected override void Seed(SchoolContext context)
         {
+            if (context.Students.Any())
+            {
+                return;
+            }
+
             var students = new List<Student>
             {
             new Student{FirstMidName="Carson",LastName="Alexander",EnrollmentDate=DateTime.Parse("2005-09-01")},
