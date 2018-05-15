@@ -9,6 +9,15 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<form asp-action="Index">
+    <input type="hidden" value="@ViewBag.StudentId"
+    <p>
+        Select Department: @Html.DropDownList("SelectedDepartment", "All")
+        <input type="submit" value="Filter"/>
+    </p>
+</form>
+
 <table class="table">
     <thead>
         <tr>
@@ -45,7 +54,7 @@
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.CourseID">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.CourseID">Details</a> |
+                    <a asp-action="Details" asp-route-id="@item.CourseID" asp-route-studentId"="@ViewBag.StudentId">Details</a> |
                     <a asp-action="Delete" asp-route-id="@item.CourseID">Delete</a>
                 </td>
             </tr>

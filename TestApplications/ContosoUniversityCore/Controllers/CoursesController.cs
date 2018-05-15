@@ -30,6 +30,22 @@ namespace ContosoUniversityCore.Controllers
             return View(await courses.ToListAsync());
         }
 
+        public ActionResult Index(int? SelectedDepartment, int? studentId)
+        {
+            ViewBag.StudentId = studentId;
+
+            var departments = _context.Departments.OrderBy(q => q.Name).ToList();
+            ViewBag.SelectedDepartment = new SelectList(departments, "DepartmentID", "Name", SelectedDepartment);
+            int departmentID = SelectedDepartment.GetValueOrDefault();
+
+            IQueryable<Course> courses = _context.Courses
+                .Where(c => !SelectedDepartment.HasValue || c.DepartmentID == departmentID)
+                .OrderBy(d => d.CourseID)
+                .Include(d => d.Department);
+            var sql = courses.ToString();
+            return View(courses.ToList());
+        }
+
         // GET: Courses/Details/5
         public async Task<IActionResult> Details(int? id, int? studentId)
         {

@@ -225,7 +225,7 @@ namespace ContosoUniversityCore.Controllers
                 try
                 {
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Details), new { id });
                 }
                 catch (DbUpdateException /* ex */)
                 {

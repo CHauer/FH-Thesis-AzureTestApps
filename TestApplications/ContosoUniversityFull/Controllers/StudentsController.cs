@@ -213,7 +213,7 @@ namespace ContosoUniversityFull.Controllers
                 {
                     db.SaveChanges();
 
-                    return RedirectToAction("Index");
+                    return RedirectToAction(nameof(Details), new { id });
                 }
                 catch (RetryLimitExceededException /* dex */)
                 {

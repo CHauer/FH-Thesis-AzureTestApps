@@ -30,7 +30,7 @@
             @Html.DisplayNameFor(model => model.Credits)
         </th>
         <th>
-            Department
+            @Html.DisplayNameFor(model => model.Department)
         </th>
         <th></th>
     </tr>
@@ -52,7 +52,7 @@
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.CourseID }) |
-                @Html.ActionLink("Details", "Details", new { id = item.CourseID }) |
+                @Html.ActionLink("Details", "Details", new { id = item.CourseID, studentId = ViewBag.StudentId }) |
                 @Html.ActionLink("Delete", "Delete", new { id = item.CourseID })
             </td>
         </tr>
