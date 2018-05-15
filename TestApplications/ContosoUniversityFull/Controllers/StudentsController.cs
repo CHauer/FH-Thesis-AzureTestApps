@@ -92,6 +92,9 @@ namespace ContosoUniversityFull.Controllers
             {
                 return HttpNotFound();
             }
+
+            ViewBag.StudentId = id;
+            TempData["Student"] = student.FullName;
             return View(student);
         }
 
@@ -112,20 +115,10 @@ namespace ContosoUniversityFull.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if (picture != null && picture.ContentLength > 0)
+                    var userPicture = HandleUserPictureUpload(picture);
+
+                    if (userPicture != null)
                     {
-                        var userPicture = new Picture()
-                        {
-                            ContentType = picture.ContentType
-                        };
-
-                        using (var reader = new BinaryReader(picture.InputStream))
-                        {
-                            userPicture.OriginalData = reader.ReadBytes(picture.ContentLength);
-                        }
-
-                        userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
-                        userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
                         student.UserPicture = userPicture;
                     }
 
@@ -140,6 +133,28 @@ namespace ContosoUniversityFull.Controllers
                 ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
             }
             return View(student);
+        }
+
+        private Picture HandleUserPictureUpload(HttpPostedFileBase picture)
+        {
+            if (picture != null && picture.ContentLength > 0)
+            {
+                var userPicture = new Picture()
+                {
+                    ContentType = picture.ContentType
+                };
+
+                using (var reader = new BinaryReader(picture.InputStream))
+                {
+                    userPicture.OriginalData = reader.ReadBytes(picture.ContentLength);
+                }
+
+                userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
+                userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
+
+                return userPicture;
+            }
+            return null;
         }
 
         private byte[] GeneratePicture(byte[] inputData, int width, int height)
@@ -177,7 +192,7 @@ namespace ContosoUniversityFull.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public ActionResult EditPost(int? id)
+        public ActionResult EditPost(int? id, HttpPostedFileBase picture)
         {
             if (id == null)
             {
@@ -187,6 +202,13 @@ namespace ContosoUniversityFull.Controllers
             if (TryUpdateModel(studentToUpdate, "",
                new string[] { "LastName", "FirstMidName", "EnrollmentDate" }))
             {
+                var userPicture = HandleUserPictureUpload(picture);
+
+                if (userPicture != null)
+                {
+                    studentToUpdate.UserPicture = userPicture;
+                }
+
                 try
                 {
                     db.SaveChanges();
@@ -249,6 +271,10 @@ namespace ContosoUniversityFull.Controllers
                                 .Include(s => s.Enrollments.Select(e => e.Course))
                                 .AsNoTracking()
                                 .SingleOrDefaultAsync(m => m.ID == id);
+
+            ViewBag.StudentId = id;
+            TempData["Student"] = model.Student.FullName;
+            TempData.Keep("Student");
 
             model.SuggestedCourses = db.Courses
                 .Where(c => c.Enrollments.All(e => e.StudentID != id))

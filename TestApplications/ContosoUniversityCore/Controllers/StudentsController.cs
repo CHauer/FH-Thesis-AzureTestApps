@@ -97,6 +97,8 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
+            ViewBag.StudentId = id;
+            TempData["Student"] = student.FullName;
             return View(student);
         }
 
@@ -118,22 +120,12 @@ namespace ContosoUniversityCore.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if(picture != null && picture.Length > 0)
+                    var userPicture = await HandleUserPictureUpload(picture);
+
+                    if (userPicture != null)
                     {
-                        var userPicture = new Picture()
-                        {
-                            ContentType = picture.ContentType
-                        };
-
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            await picture.CopyToAsync(memoryStream);
-                            userPicture.OriginalData = memoryStream.ToArray();
-                        }
-                        userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
-                        userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
-
                         student.UserPicture = userPicture;
+
                     }
 
                     _context.Add(student);
@@ -149,6 +141,29 @@ namespace ContosoUniversityCore.Controllers
                     "see your system administrator.");
             }
             return View(student);
+        }
+
+        private async Task<Picture> HandleUserPictureUpload(IFormFile picture)
+        {
+            if (picture != null && picture.Length > 0)
+            {
+                var userPicture = new Picture()
+                {
+                    ContentType = picture.ContentType
+                };
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    await picture.CopyToAsync(memoryStream);
+                    userPicture.OriginalData = memoryStream.ToArray();
+                }
+                userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
+                userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
+
+                return userPicture;
+            }
+
+            return null;
         }
 
         private byte[] GeneratePicture(byte[] inputData, int width, int height)
@@ -187,7 +202,7 @@ namespace ContosoUniversityCore.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(int? id)
+        public async Task<IActionResult> EditPost(int? id, IFormFile picture)
         {
             if (id == null)
             {
@@ -199,6 +214,14 @@ namespace ContosoUniversityCore.Controllers
                 "",
                 s => s.FirstMidName, s => s.LastName, s => s.EnrollmentDate))
             {
+
+                var userPicture = await HandleUserPictureUpload(picture);
+
+                if (userPicture != null)
+                {
+                    studentToUpdate.UserPicture = userPicture;
+                }
+
                 try
                 {
                     await _context.SaveChangesAsync();
@@ -281,6 +304,10 @@ namespace ContosoUniversityCore.Controllers
                               .AsNoTracking()
                               .SingleOrDefaultAsync(m => m.ID == id);
 
+            ViewBag.StudentId = id;
+            TempData["Student"] = model.Student.FullName;
+            TempData.Keep("Student");
+
             model.SuggestedCourses = _context.Courses
                 .Where(c => c.Enrollments.All(e => e.StudentID != id))
                 .OrderBy(c => c.Enrollments.Count)
@@ -304,7 +331,7 @@ namespace ContosoUniversityCore.Controllers
         [ActionName("UserPicture")]
         public FileResult GetUserPicture(int? id)
         {
-            if(id == null)
+            if (id == null)
             {
                 return File("/images/UserImage.png", "image/png");
             }

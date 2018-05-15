@@ -15,11 +15,13 @@
 {
     <p>
         Find by name: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
-        <input type="submit" value="Search" />
+        <input type="submit" value="Search" class="btn btn-default"  /> |
+        @Html.ActionLink("Back to Full List", "Index", "Students")
     </p>
 }
 <table class="table">
     <tr>
+        <th></th>
         <th>
             @Html.ActionLink("Last Name", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
         </th>

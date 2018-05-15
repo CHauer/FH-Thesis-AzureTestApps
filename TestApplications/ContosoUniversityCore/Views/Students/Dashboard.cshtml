@@ -36,6 +36,7 @@
             </dl>
         </div>
     </div>
+    <hr />
 </div>
 <div class="row">
     <div class="col-md-6">
@@ -45,6 +46,7 @@
             <tr>
                 <th>Course Title</th>
                 <th>Grade</th>
+                <th></th>
             </tr>
             @foreach (var item in Model.Student.Enrollments)
             {
@@ -112,6 +114,7 @@
 </div>
 
 <div>
+    <a asp-action="Details" asp-route-id="@Model.Student.ID">Details</a> |
     <a asp-action="Edit" asp-route-id="@Model.Student.ID">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

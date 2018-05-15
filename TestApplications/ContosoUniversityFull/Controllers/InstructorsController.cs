@@ -14,11 +14,11 @@ using ContosoUniversityFull.ViewModels;
 
 namespace ContosoUniversityFull.Controllers
 {
-    public class InstructorController : Controller
+    public class InstructorsController : Controller
     {
         private readonly SchoolContext db;
 
-        public InstructorController(SchoolContext db)
+        public InstructorsController(SchoolContext db)
         {
             this.db = db; 
         }

@@ -8,68 +8,68 @@
 
 @if (TempData.ContainsKey("Success"))
 {
-    <span class="success">@TempData["Success"]</span>
+    <p class="bg-success">@TempData["Success"]</p>
 }
-
 
 <div>
     <h4>Course</h4>
     <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            Department
-        </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Course.Department.Name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Course.CourseID)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Course.CourseID)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Course.Title)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Course.Title)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Course.Credits)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Course.Credits)
-        </dd>
-
-    </dl>
-</div>
-@if (ViewBag.StudentId != null)
-{
     <div class="row">
-        @using (Html.BeginForm("Enroll", "Courses", FormMethod.Post, null))
-        {
-            @Html.AntiForgeryToken()
-            int studentId = ViewBag.StudentId;
+        <div class="col-md-9">
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Course.CourseID)
+                </dt>
 
-            @Html.Hidden("courseId", Model.Course.CourseID)
-            @Html.Hidden("studentId", studentId)
+                <dd>
+                    @Html.DisplayFor(model => model.Course.CourseID)
+                </dd>
 
-            <div class="form-group">
-                <div class="col-md-offset-2 col-md-10">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Course.Title)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Course.Title)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Course.Credits)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Course.Credits)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Course.Department)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Course.Department.Name)
+                </dd>
+
+            </dl>
+        </div>
+        <div class="col-md-3">
+            @if (ViewBag.StudentId != null)
+            {
+                using (Html.BeginForm("Enroll", "Courses", FormMethod.Post, null))
+                {
+                    @Html.AntiForgeryToken()
+                    int studentId = ViewBag.StudentId;
+
+                    @Html.Hidden("courseId", Model.Course.CourseID)
+                    @Html.Hidden("studentId", studentId)
                     <input type="submit" value="Enroll for Course" class="btn btn-default" />
-                </div>
-            </div>
+                }
+            }
 
-        }
+        </div>
     </div>
-}
+    <hr />
+</div>
 
 <div>
     <h4>Other interesting Courses</h4>

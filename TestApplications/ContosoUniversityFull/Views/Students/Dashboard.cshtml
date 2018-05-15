@@ -41,6 +41,7 @@
             </dl>
         </div>
     </div>
+    <hr/>
 </div>
 
 <div class="row">
@@ -51,17 +52,21 @@
             <tr>
                 <th>Course Title</th>
                 <th>Grade</th>
+                <th></th>
             </tr>
             @foreach (var item in Model.Student.Enrollments)
             {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Course.Title)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Grade)
-                    </td>
-                </tr>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Course.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Grade)
+                </td>
+                <td>
+                    @Html.ActionLink("Details", "Details", "Courses", new { id = item.CourseID, studentId = Model.Student.ID }, null)
+                </td>
+            </tr>
             }
         </table>
     </div>
@@ -72,7 +77,7 @@
         <table class="table">
             <tr>
                 <th>Department</th>
-                <th>Credits</th>
+                <th>Start Date</th>
             </tr>
             @foreach (var item in Model.StudentDepartments)
             {
@@ -118,6 +123,7 @@
 
 
 <p>
+    @Html.ActionLink("Details", "Detils", new { id = Model.Student.ID }) |
     @Html.ActionLink("Edit", "Edit", new { id = Model.Student.ID }) |
     @Html.ActionLink("Back to List", "Index")
 </p>
