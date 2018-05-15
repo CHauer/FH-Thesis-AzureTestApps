@@ -25,11 +25,11 @@ using SixLabors.Primitives;
 
 namespace ContosoUniversityFull.Controllers
 {
-    public class StudentController : Controller
+    public class StudentsController : Controller
     {
         private readonly SchoolContext db;
 
-        public StudentController(SchoolContext db)
+        public StudentsController(SchoolContext db)
         {
             this.db = db;
         }
