@@ -73,7 +73,7 @@
     <WebTestPlugin Classname="Microsoft.SystemCenter.Cloud.GsmPlugins.RandomIntGeneratorWebTestPlugin, Microsoft.VisualStudio.QualityTools.WebTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" DisplayName="Generate Random Integer" Description="Generates a random integer.">
       <RuleParameters>
         <RuleParameter Name="ContextParameterName" Value="randomstudentid" />
-        <RuleParameter Name="MaxValue" Value="8" />
+        <RuleParameter Name="MaxValue" Value="410" />
         <RuleParameter Name="MinValue" Value="1" />
       </RuleParameters>
     </WebTestPlugin>
