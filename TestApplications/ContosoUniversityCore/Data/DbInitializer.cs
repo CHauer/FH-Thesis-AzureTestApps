@@ -21,6 +21,9 @@ namespace ContosoUniversityCore.Data
         {
             //context.Database.EnsureCreated();
 
+            firstNamesMax = firstNames.Count;
+            lastNamesMax = lastNames.Count;
+
             // Look for any students.
             if (context.Students.Any())
             {
@@ -51,23 +54,22 @@ namespace ContosoUniversityCore.Data
                     EnrollmentDate =DateTime.Parse("2005-09-01")}
             };
 
+            DateTime createDate = DateTime.Now;
+
             for (int i = 0; i < 400; i++)
             {
                 students.Add(new Student()
                 {
                     FirstMidName = firstNames[random.Next(0, firstNamesMax)],
                     LastName = lastNames[random.Next(0, lastNamesMax)],
-                    EnrollmentDate = DateTime.Now
+                    EnrollmentDate = createDate
                 });
             }
 
-            foreach (Student s in students)
-            {
-                context.Students.Add(s);
-            }
+            students.ForEach(s => context.Students.Add(s));
             context.SaveChanges();
 
-            var instructors = new Instructor[]
+            var instructors = new List<Instructor>
             {
                 new Instructor { FirstMidName = "Kim",     LastName = "Abercrombie",
                     HireDate = DateTime.Parse("1995-03-11") },
@@ -81,13 +83,10 @@ namespace ContosoUniversityCore.Data
                     HireDate = DateTime.Parse("2004-02-12") }
             };
 
-            foreach (Instructor i in instructors)
-            {
-                context.Instructors.Add(i);
-            }
+            instructors.ForEach(i => context.Instructors.Add(i));
             context.SaveChanges();
 
-            var departments = new Department[]
+            var departments = new List<Department>
             {
                 new Department { Name = "English",     Budget = 350000,
                     StartDate = DateTime.Parse("2007-09-01"),
@@ -100,16 +99,16 @@ namespace ContosoUniversityCore.Data
                     InstructorID  = instructors.Single( i => i.LastName == "Harui").ID },
                 new Department { Name = "Economics",   Budget = 100000,
                     StartDate = DateTime.Parse("2007-09-01"),
-                    InstructorID  = instructors.Single( i => i.LastName == "Kapoor").ID }
+                    InstructorID  = instructors.Single( i => i.LastName == "Kapoor").ID },
+                new Department { Name = "Software Engineering", Budget = 350000,
+                    StartDate = DateTime.Parse("2007-09-01"),
+                    InstructorID  = instructors.Single( i => i.LastName == "Harui").ID },
             };
 
-            foreach (Department d in departments)
-            {
-                context.Departments.Add(d);
-            }
+            departments.ForEach(d => context.Departments.Add(d));
             context.SaveChanges();
 
-            var courses = new Course[]
+            var courses = new List<Course>
             {
                 new Course {CourseID = 1050, Title = "Chemistry",      Credits = 3,
                     DepartmentID = departments.Single( s => s.Name == "Engineering").DepartmentID
@@ -134,10 +133,23 @@ namespace ContosoUniversityCore.Data
                 },
             };
 
-            foreach (Course c in courses)
+            int startNumber = 6001;
+            List<string> createCourses = new List<string> {"Functional Programming","Algorithmics", "Machine Learning", "Software Security", "Digital Forensics",
+            "Database Systems", "Knowledge Management", "Software Testing","Project Management", "Network Engineering", "Distributed Systems"};
+
+            foreach (string newCourse in createCourses)
             {
-                context.Courses.Add(c);
+                courses.Add(new Course
+                {
+                    CourseID = startNumber,
+                    Title = newCourse,
+                    Credits = random.Next(1, 8),
+                    DepartmentID = departments.Single(s => s.Name == "Software Engineering").DepartmentID
+                });
+                startNumber++;
             }
+
+            courses.ForEach(c => context.Courses.Add(c));
             context.SaveChanges();
 
             var officeAssignments = new OfficeAssignment[]

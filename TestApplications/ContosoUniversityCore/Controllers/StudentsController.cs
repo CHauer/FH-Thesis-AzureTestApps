@@ -98,7 +98,6 @@ namespace ContosoUniversityCore.Controllers
             }
 
             ViewBag.StudentId = id;
-            TempData["Student"] = student.FullName;
             return View(student);
         }
 
@@ -305,8 +304,6 @@ namespace ContosoUniversityCore.Controllers
                               .SingleOrDefaultAsync(m => m.ID == id);
 
             ViewBag.StudentId = id;
-            TempData["Student"] = model.Student.FullName;
-            TempData.Keep("Student");
 
             model.SuggestedCourses = _context.Courses
                 .Where(c => c.Enrollments.All(e => e.StudentID != id))

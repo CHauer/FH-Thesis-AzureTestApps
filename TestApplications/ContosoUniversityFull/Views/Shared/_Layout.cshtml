@@ -39,10 +39,10 @@
                     <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
                 </ul>
 
-                @if (ViewBag.StudentId != null || TempData.ContainsKey("StudentId"))
+                @if (ViewBag.StudentId != null)
                 {
                     <p class="navbar-text">
-                        <span style="font-size: 80%">Student:</span> <b>@TempData.Peek("Student")</b>
+                        <span style="font-size: 80%">Student:</span> <b>@ViewBag.StudentId</b>
                     </p>
                 }
             </div>

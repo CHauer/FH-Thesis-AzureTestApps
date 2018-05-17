@@ -22,20 +22,13 @@ namespace ContosoUniversityCore.Controllers
         }
 
         // GET: Courses
-        public async Task<IActionResult> Index()
-        {
-            var courses = _context.Courses
-                .Include(c => c.Department)
-                .AsNoTracking();
-            return View(await courses.ToListAsync());
-        }
-
         public ActionResult Index(int? SelectedDepartment, int? studentId)
         {
             ViewBag.StudentId = studentId;
 
             var departments = _context.Departments.OrderBy(q => q.Name).ToList();
             ViewBag.SelectedDepartment = new SelectList(departments, "DepartmentID", "Name", SelectedDepartment);
+
             int departmentID = SelectedDepartment.GetValueOrDefault();
 
             IQueryable<Course> courses = _context.Courses
