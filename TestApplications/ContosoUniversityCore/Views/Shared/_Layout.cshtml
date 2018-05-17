@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -15,6 +16,7 @@
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
+    @Html.Raw(JavaScriptSnippet.FullScript)
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -38,11 +40,11 @@
                     <li><a asp-area="" asp-controller="Departments" asp-action="Index">Departments</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
                 </ul>
-                
-                @if (ViewBag.StudentId != null || TempData.ContainsKey("StudentId"))
+
+                @if (ViewBag.StudentId != null)
                 {
                     <p class="navbar-text">
-                        <span style="font-size: 80%">Student:</span> <b>@TempData.Peek("Student")</b>
+                        <span style="font-size: 80%">Student:</span> <b>@ViewBag.StudentId)</b>
                     </p>
                 }
             </div>
