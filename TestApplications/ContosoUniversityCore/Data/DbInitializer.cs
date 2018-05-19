@@ -143,7 +143,7 @@ namespace ContosoUniversityCore.Data
                 {
                     CourseID = startNumber,
                     Title = newCourse,
-                    Credits = random.Next(1, 8),
+                    Credits = random.Next(0, 6),
                     DepartmentID = departments.Single(s => s.Name == "Software Engineering").DepartmentID
                 });
                 startNumber++;
