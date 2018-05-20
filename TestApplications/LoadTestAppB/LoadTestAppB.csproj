@@ -49,14 +49,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CreateStudentWithoutPicture.webtest">
+    <None Include="1b-CreateStudentWithoutPicture.webtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="CreateStudent.webtest">
+    <None Include="1a-CreateStudent.webtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CourseData-B.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="userimage-b.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

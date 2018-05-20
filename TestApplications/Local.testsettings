@@ -2,8 +2,10 @@
 <TestSettings name="Local" id="90c8cb4d-ecfa-4496-836f-0a9d943db2ef" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
   <Description>These are default test settings for a local test run.</Description>
   <Deployment>
-    <DeploymentItem filename="LoadTestAppB\userimage-b.png" />
+    <DeploymentItem filename="LoadTestAppB\CourseData-B.xml" />
+    <DeploymentItem filename="LoadTestAppA\CourseData-A.xml" />
     <DeploymentItem filename="LoadTestAppA\userimage-a.png" />
+    <DeploymentItem filename="LoadTestAppB\userimage-b.png" />
   </Deployment>
   <Execution hostProcessPlatform="MSIL">
     <TestTypeSpecific>
