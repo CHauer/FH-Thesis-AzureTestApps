@@ -58,7 +58,7 @@
     <None Include="1b-CreateStudentWithoutPicture.webtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="1a-CreateStudent.webtest">
+    <None Include="1a-CreateStudentWithPicture.webtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="2a-CourseDetailsWithEnrollment.webtest">
