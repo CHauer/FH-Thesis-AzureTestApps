@@ -22,21 +22,22 @@ namespace ContosoUniversityCore.Controllers
         }
 
         // GET: Courses
-        public ActionResult Index(int? SelectedDepartment, int? studentId)
+        public async Task<ActionResult> Index(int? selectedDepartment, int? studentId)
         {
             ViewBag.StudentId = studentId;
 
-            var departments = _context.Departments.OrderBy(q => q.Name).ToList();
-            ViewBag.SelectedDepartment = new SelectList(departments, "DepartmentID", "Name", SelectedDepartment);
+            var departments = await _context.Departments.OrderBy(q => q.Name).ToListAsync();
+            ViewBag.SelectedDepartment = new SelectList(departments, "DepartmentID", "Name", selectedDepartment);
 
-            int departmentID = SelectedDepartment.GetValueOrDefault();
+            int departmentID = selectedDepartment.GetValueOrDefault();
 
             IQueryable<Course> courses = _context.Courses
-                .Where(c => !SelectedDepartment.HasValue || c.DepartmentID == departmentID)
+                .Where(c => !selectedDepartment.HasValue || c.DepartmentID == departmentID)
                 .OrderBy(d => d.CourseID)
                 .Include(d => d.Department);
-            var sql = courses.ToString();
-            return View(courses.ToList());
+
+            // var sql = courses.ToString();
+            return View(await courses.ToListAsync());
         }
 
         // GET: Courses/Details/5
@@ -49,29 +50,29 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            CourseDetailsViewModel model = new CourseDetailsViewModel();
-
-            model.Course = await _context.Courses
-                .Include(c => c.Department)
-                .AsNoTracking()
-                .SingleOrDefaultAsync(m => m.CourseID == id);
+            CourseDetailsViewModel model = new CourseDetailsViewModel
+            {
+                Course = await _context.Courses.Include(c => c.Department)
+                             .AsNoTracking()
+                             .SingleOrDefaultAsync(m => m.CourseID == id)
+            };
 
             if (model.Course == null)
             {
                 return NotFound();
             }
 
-            model.OtherCourses = _context.Courses
+            model.OtherCourses = await _context.Courses
                 .Where(c => c.CourseID != id && c.DepartmentID == model.Course.DepartmentID)
-                .ToList();
+                .ToListAsync();
 
             return View(model);
         }
 
         // GET: Courses/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            PopulateDepartmentsDropDownList();
+            await PopulateDepartmentsDropDownList();
             return View();
         }
 
@@ -85,7 +86,7 @@ namespace ContosoUniversityCore.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            PopulateDepartmentsDropDownList(course.DepartmentID);
+            await PopulateDepartmentsDropDownList(course.DepartmentID);
             return View(course);
         }
 
@@ -103,7 +104,7 @@ namespace ContosoUniversityCore.Controllers
             {
                 return NotFound();
             }
-            PopulateDepartmentsDropDownList(course.DepartmentID);
+            await PopulateDepartmentsDropDownList(course.DepartmentID);
             return View(course);
         }
 
@@ -136,16 +137,18 @@ namespace ContosoUniversityCore.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            PopulateDepartmentsDropDownList(courseToUpdate.DepartmentID);
+            await PopulateDepartmentsDropDownList(courseToUpdate.DepartmentID);
             return View(courseToUpdate);
         }
 
-        private void PopulateDepartmentsDropDownList(object selectedDepartment = null)
+        private async Task PopulateDepartmentsDropDownList(object selectedDepartment = null)
         {
-            var departmentsQuery = from d in _context.Departments
-                                   orderby d.Name
-                                   select d;
-            ViewBag.DepartmentID = new SelectList(departmentsQuery.AsNoTracking(), "DepartmentID", "Name", selectedDepartment);
+            //var departmentsQuery = from d in _context.Departments
+            //                       orderby d.Name
+            //                       select d;
+            var departmentsQuery = _context.Departments.OrderBy(d => d.Name).AsNoTracking();
+
+            ViewBag.DepartmentID = new SelectList(await departmentsQuery.ToListAsync(), "DepartmentID", "Name", selectedDepartment);
         }
 
 
