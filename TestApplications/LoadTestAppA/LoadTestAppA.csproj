@@ -90,6 +90,7 @@
     <Content Include="CourseData-A.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="ExtractLiveMetrics.js" />
     <Content Include="userimage-a.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

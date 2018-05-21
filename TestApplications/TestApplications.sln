@@ -27,11 +27,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Caching", "Caching", "{7680
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackgroundJobs", "BackgroundJobs", "{6EF0AF91-1307-4C14-AE7F-1F9D40CDD191}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LiveMetrics", "LiveMetrics", "{FC1944D3-D681-4E04-AB88-9EE2204E8DE8}"
-	ProjectSection(SolutionItems) = preProject
-		LiveMetricServer\ExtractLiveMetrics.js = LiveMetricServer\ExtractLiveMetrics.js
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
