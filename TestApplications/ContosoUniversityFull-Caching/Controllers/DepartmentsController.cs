@@ -11,6 +11,7 @@ using System.Data.Entity.Infrastructure;
 
 using ContosoUniversityFull.DAL;
 using ContosoUniversityFull.Models;
+using ContosoUniversityFull.Services;
 
 namespace ContosoUniversityFull.Controllers
 {
@@ -18,16 +19,19 @@ namespace ContosoUniversityFull.Controllers
     {
         private readonly SchoolContext db;
 
-        public DepartmentsController(SchoolContext db)
+        private readonly IDepartmentDataService departmentService;
+
+        public DepartmentsController(SchoolContext db, IDepartmentDataService departmentService)
         {
             this.db = db;
+            this.departmentService = departmentService;
         }
 
         // GET: Department
         public async Task<ActionResult> Index()
         {
-            var departments = db.Departments.Include(d => d.Administrator);
-            return View(await departments.ToListAsync());
+            var departments = await departmentService.GetDepartmentsAsync();
+            return View(departments);
         }
 
         // GET: Department/Details/5

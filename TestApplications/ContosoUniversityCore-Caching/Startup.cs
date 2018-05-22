@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using ContosoUniversityCore.Data;
 
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
+using ContosoUniversityCore.Services;
 
 namespace ContosoUniversityCore
 {
@@ -28,7 +30,18 @@ namespace ContosoUniversityCore
             services.AddDbContext<SchoolContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddMemoryCache();
             services.AddMvc();
+
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = Configuration.GetConnectionString("RedisCache");
+            });
+
+            services.AddTransient<IPictureDataService, PictureDataService>();
+            services.AddTransient<IDepartmentDataService, DepartmentDataService>();
+            services.AddTransient<ICourseDataService, CourseDataService>();
+            services.AddTransient<IStudentDataService, LocalStudentDataService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

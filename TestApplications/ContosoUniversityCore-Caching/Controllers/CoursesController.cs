@@ -9,29 +9,39 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversityCore.Data;
 using ContosoUniversityCore.Models;
 using ContosoUniversityCore.Models.SchoolViewModels;
+using ContosoUniversityCore.Services;
 
 namespace ContosoUniversityCore.Controllers
 {
     public class CoursesController : Controller
     {
-        private readonly SchoolContext _context;
+        private readonly SchoolContext context;
 
-        public CoursesController(SchoolContext context)
+        private readonly ICourseDataService courseService;
+
+        private readonly IDepartmentDataService departmentService;
+
+        private readonly IStudentDataService studentService;
+
+        public CoursesController(SchoolContext context, ICourseDataService courseService, IDepartmentDataService departmentService, IStudentDataService studentService)
         {
-            _context = context;
+            this.context = context;
+            this.courseService = courseService;
+            this.departmentService = departmentService;
+            this.studentService = studentService;
         }
 
         // GET: Courses
-        public ActionResult Index(int? SelectedDepartment, int? studentId)
+        public async Task<ActionResult> Index(int? SelectedDepartment, int? studentId)
         {
             ViewBag.StudentId = studentId;
 
-            var departments = _context.Departments.OrderBy(q => q.Name).ToList();
+            var departments = await departmentService.GetDepartmentsAsync();
             ViewBag.SelectedDepartment = new SelectList(departments, "DepartmentID", "Name", SelectedDepartment);
 
             int departmentID = SelectedDepartment.GetValueOrDefault();
 
-            IQueryable<Course> courses = _context.Courses
+            IQueryable<Course> courses = context.Courses
                 .Where(c => !SelectedDepartment.HasValue || c.DepartmentID == departmentID)
                 .OrderBy(d => d.CourseID)
                 .Include(d => d.Department);
@@ -51,19 +61,14 @@ namespace ContosoUniversityCore.Controllers
 
             CourseDetailsViewModel model = new CourseDetailsViewModel();
 
-            model.Course = await _context.Courses
-                .Include(c => c.Department)
-                .AsNoTracking()
-                .SingleOrDefaultAsync(m => m.CourseID == id);
+            model.Course = await courseService.GetCourseAsync(id.GetValueOrDefault());
 
             if (model.Course == null)
             {
                 return NotFound();
             }
 
-            model.OtherCourses = _context.Courses
-                .Where(c => c.CourseID != id && c.DepartmentID == model.Course.DepartmentID)
-                .ToList();
+            model.OtherCourses = await courseService.GetCourseRecommendationsAsync(model.Course.CourseID, model.Course.DepartmentID);
 
             return View(model);
         }
@@ -81,8 +86,8 @@ namespace ContosoUniversityCore.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(course);
-                await _context.SaveChangesAsync();
+                context.Add(course);
+                await context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             PopulateDepartmentsDropDownList(course.DepartmentID);
@@ -96,7 +101,7 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            var course = await _context.Courses
+            var course = await context.Courses
                 .AsNoTracking()
                 .SingleOrDefaultAsync(m => m.CourseID == id);
             if (course == null)
@@ -116,7 +121,7 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            var courseToUpdate = await _context.Courses
+            var courseToUpdate = await context.Courses
                 .SingleOrDefaultAsync(c => c.CourseID == id);
 
             if (await TryUpdateModelAsync<Course>(courseToUpdate,
@@ -125,7 +130,8 @@ namespace ContosoUniversityCore.Controllers
             {
                 try
                 {
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
+                    courseService.DeleteCourseCache(id.GetValueOrDefault());
                 }
                 catch (DbUpdateException /* ex */)
                 {
@@ -140,12 +146,11 @@ namespace ContosoUniversityCore.Controllers
             return View(courseToUpdate);
         }
 
-        private void PopulateDepartmentsDropDownList(object selectedDepartment = null)
+        private async void PopulateDepartmentsDropDownList(object selectedDepartment = null)
         {
-            var departmentsQuery = from d in _context.Departments
-                                   orderby d.Name
-                                   select d;
-            ViewBag.DepartmentID = new SelectList(departmentsQuery.AsNoTracking(), "DepartmentID", "Name", selectedDepartment);
+            var departments = await departmentService.GetDepartmentsAsync();
+
+            ViewBag.DepartmentID = new SelectList(departments, "DepartmentID", "Name", selectedDepartment);
         }
 
 
@@ -157,7 +162,7 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            var course = await _context.Courses
+            var course = await context.Courses
                 .Include(c => c.Department)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(m => m.CourseID == id);
@@ -174,9 +179,9 @@ namespace ContosoUniversityCore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var course = await _context.Courses.SingleOrDefaultAsync(m => m.CourseID == id);
-            _context.Courses.Remove(course);
-            await _context.SaveChangesAsync();
+            var course = await context.Courses.SingleOrDefaultAsync(m => m.CourseID == id);
+            context.Courses.Remove(course);
+            await context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
@@ -191,7 +196,7 @@ namespace ContosoUniversityCore.Controllers
             if (multiplier != null)
             {
                 ViewData["RowsAffected"] =
-                    await _context.Database.ExecuteSqlCommandAsync(
+                    await context.Database.ExecuteSqlCommandAsync(
                         "UPDATE Course SET Credits = Credits * {0}",
                         parameters: multiplier);
             }
@@ -204,21 +209,20 @@ namespace ContosoUniversityCore.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (!_context.Enrollments.Any(e => e.CourseID == courseId && e.StudentID == studentId))
+                if (!context.Enrollments.Any(e => e.CourseID == courseId && e.StudentID == studentId))
                 {
                     var newEnrollment = new Enrollment() { CourseID = courseId, StudentID = studentId };
 
-                    _context.Enrollments.Add(newEnrollment);
-                    await _context.SaveChangesAsync();
+                    context.Enrollments.Add(newEnrollment);
+                    await context.SaveChangesAsync();
+
+                    studentService.DeleteStudentSuggestedCoursesCache(studentId);
+
                     TempData["Success"] = $"Student successfully enrolled for Couse.";
                 }
             }
             return RedirectToAction(nameof(Details), new { id = courseId, studentId });
         }
 
-        private bool CourseExists(int id)
-        {
-            return _context.Courses.Any(e => e.CourseID == id);
-        }
     }
 }

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversityCore.Data;
 using ContosoUniversityCore.Models;
 using ContosoUniversityCore.Models.SchoolViewModels;
+using ContosoUniversityCore.Services;
 
 using Microsoft.AspNetCore.Http;
 
@@ -23,11 +24,17 @@ namespace ContosoUniversityCore.Controllers
 {
     public class StudentsController : Controller
     {
-        private readonly SchoolContext _context;
+        private readonly SchoolContext context;
 
-        public StudentsController(SchoolContext context)
+        private readonly IStudentDataService studentService;
+
+        private readonly IPictureDataService pictureService;
+
+        public StudentsController(SchoolContext context, IStudentDataService studentService, IPictureDataService pictureService)
         {
-            _context = context;
+            this.context = context;
+            this.studentService = studentService;
+            this.pictureService = pictureService;
         }
 
         // GET: Students
@@ -52,7 +59,7 @@ namespace ContosoUniversityCore.Controllers
 
             ViewData["CurrentFilter"] = searchString;
 
-            var students = from s in _context.Students
+            var students = from s in context.Students
                            select s;
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -86,11 +93,7 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Students
-                .Include(s => s.Enrollments)
-                    .ThenInclude(e => e.Course)
-                .AsNoTracking()
-                .SingleOrDefaultAsync(m => m.ID == id);
+            Student student = await studentService.GetStudentAsync(id.GetValueOrDefault());
 
             if (student == null)
             {
@@ -127,8 +130,8 @@ namespace ContosoUniversityCore.Controllers
 
                     }
 
-                    _context.Add(student);
-                    await _context.SaveChangesAsync();
+                    context.Add(student);
+                    await context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -188,7 +191,7 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Students.SingleOrDefaultAsync(m => m.ID == id);
+            var student = await context.Students.SingleOrDefaultAsync(m => m.ID == id);
             if (student == null)
             {
                 return NotFound();
@@ -201,40 +204,29 @@ namespace ContosoUniversityCore.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(int? id, IFormFile picture)
+        public async Task<IActionResult> EditPost(Student model, IFormFile picture)
         {
-            if (id == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                return View(model);
             }
-            var studentToUpdate = await _context.Students.SingleOrDefaultAsync(s => s.ID == id);
-            if (await TryUpdateModelAsync<Student>(
-                studentToUpdate,
-                "",
-                s => s.FirstMidName, s => s.LastName, s => s.EnrollmentDate))
+
+            var userPicture = await HandleUserPictureUpload(picture);
+
+            try
             {
+                await studentService.UpdateStudentAsync(model, userPicture);
 
-                var userPicture = await HandleUserPictureUpload(picture);
-
-                if (userPicture != null)
-                {
-                    studentToUpdate.UserPicture = userPicture;
-                }
-
-                try
-                {
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-                catch (DbUpdateException /* ex */)
-                {
-                    //Log the error (uncomment ex variable name and write a log.)
-                    ModelState.AddModelError("", "Unable to save changes. " +
-                        "Try again, and if the problem persists, " +
-                        "see your system administrator.");
-                }
+                return RedirectToAction(nameof(Details), new { model.ID });
             }
-            return View(studentToUpdate);
+            catch (DbUpdateException /* ex */)
+            {
+                //Log the error (uncomment ex variable name and write a log.)
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.");
+            }
+            return View(model);
         }
         // GET: Students/Delete/5
         public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
@@ -244,7 +236,7 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Students
+            var student = await context.Students
                 .AsNoTracking()
                 .SingleOrDefaultAsync(m => m.ID == id);
             if (student == null)
@@ -267,7 +259,7 @@ namespace ContosoUniversityCore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var student = await _context.Students
+            var student = await context.Students
                 .AsNoTracking()
                 .SingleOrDefaultAsync(m => m.ID == id);
             if (student == null)
@@ -277,8 +269,8 @@ namespace ContosoUniversityCore.Controllers
 
             try
             {
-                _context.Students.Remove(student);
-                await _context.SaveChangesAsync();
+                context.Students.Remove(student);
+                await context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
             catch (DbUpdateException /* ex */)
@@ -290,50 +282,38 @@ namespace ContosoUniversityCore.Controllers
 
         private bool StudentExists(int id)
         {
-            return _context.Students.Any(e => e.ID == id);
+            return context.Students.Any(e => e.ID == id);
         }
 
         public async Task<IActionResult> Dashboard(int id)
         {
             StudentDashboardViewModel model = new StudentDashboardViewModel();
 
-            model.Student = await _context.Students
-                              .Include(s => s.Enrollments)
-                              .ThenInclude(e => e.Course)
-                              .AsNoTracking()
-                              .SingleOrDefaultAsync(m => m.ID == id);
-
             ViewBag.StudentId = id;
 
-            model.SuggestedCourses = _context.Courses
-                .Where(c => c.Enrollments.All(e => e.StudentID != id))
-                .OrderBy(c => c.Enrollments.Count)
-                .Take(10)
-                .AsNoTracking().ToList();
-
-            var departmentIds = _context.Enrollments
-                .Where(e => e.StudentID == id)
-                .Select(e => e.Course.DepartmentID).Distinct();
-
-            model.StudentDepartments = _context.Departments.Where(d => departmentIds.Contains(d.DepartmentID)).AsNoTracking().ToList();
+            model.Student = await studentService.GetStudentAsync(id);
 
             if (model.Student == null)
             {
                 return NotFound();
             }
 
+            model.SuggestedCourses = await studentService.GetStudentSuggestedCoursesAsync(id);
+            model.StudentDepartments = await studentService.GetStudentDepartmentsAsync(id);
+
+
             return View(model);
         }
 
         [ActionName("UserPicture")]
-        public FileResult GetUserPicture(int? id)
+        public async Task<FileResult> GetUserPicture(int? id)
         {
             if (id == null)
             {
                 return File("/images/UserImage.png", "image/png");
             }
 
-            var picture = _context.Pictures.FirstOrDefault(p => p.PictureID == id);
+            var picture = await pictureService.GetPictureAsync(id.GetValueOrDefault());
 
             if (picture == null || picture.Data.Length == 0)
             {

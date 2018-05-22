@@ -16,11 +16,11 @@ namespace ContosoUniversityCore.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly SchoolContext _context;
+        private readonly SchoolContext context;
 
         public HomeController(SchoolContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public IActionResult Index()
@@ -31,7 +31,7 @@ namespace ContosoUniversityCore.Controllers
         public async Task<ActionResult> About()
         {
             List<EnrollmentDateGroup> groups = new List<EnrollmentDateGroup>();
-            var conn = _context.Database.GetDbConnection();
+            var conn = context.Database.GetDbConnection();
             try
             {
                 await conn.OpenAsync();

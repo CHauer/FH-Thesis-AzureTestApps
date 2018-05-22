@@ -10,7 +10,9 @@ using System.Data.Entity.Infrastructure;
 
 using ContosoUniversityFull.DAL;
 using ContosoUniversityFull.Models;
+using ContosoUniversityFull.Services;
 using ContosoUniversityFull.ViewModels;
+using System.Threading.Tasks;
 
 namespace ContosoUniversityFull.Controllers
 {
@@ -18,17 +20,26 @@ namespace ContosoUniversityFull.Controllers
     {
         private SchoolContext db;
 
-        public CoursesController(SchoolContext db)
+        private readonly ICourseDataService courseService;
+
+        private readonly IDepartmentDataService departmentService;
+
+        private readonly IStudentDataService studentService;
+
+        public CoursesController(SchoolContext db, ICourseDataService courseService, IDepartmentDataService departmentService, IStudentDataService studentService)
         {
             this.db = db;
+            this.courseService = courseService;
+            this.departmentService = departmentService;
+            this.studentService = studentService;
         }
 
         // GET: Course
-        public ActionResult Index(int? SelectedDepartment, int? studentId)
+        public async Task<ActionResult> Index(int? SelectedDepartment, int? studentId)
         {
             ViewBag.StudentId = studentId;
 
-            var departments = db.Departments.OrderBy(q => q.Name).ToList();
+            var departments = await departmentService.GetDepartmentsAsync();
             ViewBag.SelectedDepartment = new SelectList(departments, "DepartmentID", "Name", SelectedDepartment);
             int departmentID = SelectedDepartment.GetValueOrDefault();
 
@@ -36,12 +47,12 @@ namespace ContosoUniversityFull.Controllers
                 .Where(c => !SelectedDepartment.HasValue || c.DepartmentID == departmentID)
                 .OrderBy(d => d.CourseID)
                 .Include(d => d.Department);
-            var sql = courses.ToString();
+
             return View(courses.ToList());
         }
 
         // GET: Course/Details/5
-        public ActionResult Details(int? id, int? studentId)
+        public async Task<ActionResult> Details(int? id, int? studentId)
         {
             ViewBag.StudentId = studentId;
 
@@ -52,20 +63,17 @@ namespace ContosoUniversityFull.Controllers
 
             CourseDetailsViewModel model = new CourseDetailsViewModel();
 
-            model.Course = db.Courses.Find(id);
+            model.Course = await courseService.GetCourseAsync(id.GetValueOrDefault());
 
             if (model.Course == null)
             {
                 return HttpNotFound();
             }
 
-            model.OtherCourses = db.Courses
-                .Where(c => c.CourseID != id && c.DepartmentID == model.Course.DepartmentID)
-                .ToList();
+            model.OtherCourses = await courseService.GetCourseRecommendationsAsync(model.Course.CourseID, model.Course.DepartmentID);
 
             return View(model);
         }
-
 
         public ActionResult Create()
         {
@@ -125,6 +133,7 @@ namespace ContosoUniversityFull.Controllers
                 try
                 {
                     db.SaveChanges();
+                    courseService.DeleteCourseCache(id.GetValueOrDefault());
 
                     return RedirectToAction("Index");
                 }
@@ -138,12 +147,11 @@ namespace ContosoUniversityFull.Controllers
             return View(courseToUpdate);
         }
 
-        private void PopulateDepartmentsDropDownList(object selectedDepartment = null)
+        private async void PopulateDepartmentsDropDownList(object selectedDepartment = null)
         {
-            var departmentsQuery = from d in db.Departments
-                                   orderby d.Name
-                                   select d;
-            ViewBag.DepartmentID = new SelectList(departmentsQuery, "DepartmentID", "Name", selectedDepartment);
+            var departments = await departmentService.GetDepartmentsAsync();
+
+            ViewBag.DepartmentID = new SelectList(departments, "DepartmentID", "Name", selectedDepartment);
         }
 
 
@@ -200,6 +208,9 @@ namespace ContosoUniversityFull.Controllers
 
                     db.Enrollments.Add(newEnrollment);
                     db.SaveChanges();
+
+                    studentService.DeleteStudentSuggestedCoursesCache(studentId);
+
                     TempData["Success"] = $"Student successfully enrolled for Couse.";
                 }
             }

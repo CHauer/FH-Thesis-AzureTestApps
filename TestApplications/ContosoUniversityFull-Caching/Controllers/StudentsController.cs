@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using ContosoUniversityFull.DAL;
 using ContosoUniversityFull.Models;
 using ContosoUniversityFull.Models.SchoolViewModels;
+using ContosoUniversityFull.Services;
 
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -29,9 +30,15 @@ namespace ContosoUniversityFull.Controllers
     {
         private readonly SchoolContext db;
 
-        public StudentsController(SchoolContext db)
+        private readonly IStudentDataService studentService;
+
+        private readonly IPictureDataService pictureService;
+
+        public StudentsController(SchoolContext db, IStudentDataService studentService, IPictureDataService pictureService)
         {
             this.db = db;
+            this.studentService = studentService;
+            this.pictureService = pictureService;
         }
 
         // GET: Student
@@ -81,13 +88,15 @@ namespace ContosoUniversityFull.Controllers
         }
 
         // GET: Student/Details/5
-        public ActionResult Details(int? id)
+        public async Task<ActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+            
+            Student student = await studentService.GetStudentAsync(id.GetValueOrDefault());
+
             if (student == null)
             {
                 return HttpNotFound();
@@ -191,36 +200,28 @@ namespace ContosoUniversityFull.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public ActionResult EditPost(int? id, HttpPostedFileBase picture)
+        public async Task<ActionResult> EditPost(Student model, HttpPostedFileBase picture)
         {
-            if (id == null)
+            var userPicture = HandleUserPictureUpload(picture);
+
+            if (!ModelState.IsValid)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return View(model);
             }
-            var studentToUpdate = db.Students.Find(id);
-            if (TryUpdateModel(studentToUpdate, "",
-               new string[] { "LastName", "FirstMidName", "EnrollmentDate" }))
+
+            try
             {
-                var userPicture = HandleUserPictureUpload(picture);
+                await studentService.UpdateStudentAsync(model, userPicture);
 
-                if (userPicture != null)
-                {
-                    studentToUpdate.UserPicture = userPicture;
-                }
-
-                try
-                {
-                    db.SaveChanges();
-
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-                catch (RetryLimitExceededException /* dex */)
-                {
-                    //Log the error (uncomment dex variable name and add a line here to write a log.
-                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
-                }
+                return RedirectToAction(nameof(Details), new { model.ID });
             }
-            return View(studentToUpdate);
+            catch (RetryLimitExceededException /* dex */)
+            {
+                //Log the error (uncomment dex variable name and add a line here to write a log.
+                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
+            }
+
+            return View(model);
         }
 
         // GET: Student/Delete/5
@@ -265,45 +266,30 @@ namespace ContosoUniversityFull.Controllers
         {
             StudentDashboardViewModel model = new StudentDashboardViewModel();
 
-            model.Student = await db.Students
-                                .Include(s => s.Enrollments)
-                                .Include(s => s.Enrollments.Select(e => e.Course))
-                                .AsNoTracking()
-                                .SingleOrDefaultAsync(m => m.ID == id);
-
             ViewBag.StudentId = id;
 
-            model.SuggestedCourses = db.Courses
-                .Where(c => c.Enrollments.All(e => e.StudentID != id))
-                .OrderBy(c => c.Enrollments.Count)
-                .Take(10)
-                .AsNoTracking().ToList();
-
-            var departmentIds = db.Enrollments
-                .Where(e => e.StudentID == id)
-                .Select(e => e.Course.DepartmentID).Distinct();
-
-            model.StudentDepartments = db.Departments
-                .Where(d => departmentIds.Contains(d.DepartmentID))
-                .AsNoTracking().ToList();
+            model.Student = await studentService.GetStudentAsync(id);
 
             if (model.Student == null)
             {
                 return new HttpNotFoundResult();
             }
 
+            model.SuggestedCourses = await studentService.GetStudentSuggestedCoursesAsync(id);
+            model.StudentDepartments = await studentService.GetStudentDepartmentsAsync(id);
+
             return View(model);
         }
 
         [ActionName("UserPicture")]
-        public FileResult GetUserPicture(int? id)
+        public async Task<FileResult> GetUserPicture(int? id)
         {
             if (id == null)
             {
                 return File("/Content/UserImage.png", "image/png");
             }
 
-            var picture = db.Pictures.FirstOrDefault(p => p.PictureID == id);
+            var picture = await pictureService.GetPictureAsync(id.GetValueOrDefault());
 
             if (picture == null || picture.Data.Length == 0)
             {
