@@ -305,17 +305,17 @@ namespace ContosoUniversityCore.Controllers
 
             ViewBag.StudentId = id;
 
-            model.SuggestedCourses = _context.Courses
+            model.SuggestedCourses = await _context.Courses
                 .Where(c => c.Enrollments.All(e => e.StudentID != id))
                 .OrderBy(c => c.Enrollments.Count)
                 .Take(10)
-                .AsNoTracking().ToList();
+                .AsNoTracking().ToListAsync();
 
             var departmentIds = _context.Enrollments
                 .Where(e => e.StudentID == id)
                 .Select(e => e.Course.DepartmentID).Distinct();
 
-            model.StudentDepartments = _context.Departments.Where(d => departmentIds.Contains(d.DepartmentID)).AsNoTracking().ToList();
+            model.StudentDepartments = await _context.Departments.Where(d => departmentIds.Contains(d.DepartmentID)).AsNoTracking().ToListAsync();
 
             if (model.Student == null)
             {
@@ -326,14 +326,14 @@ namespace ContosoUniversityCore.Controllers
         }
 
         [ActionName("UserPicture")]
-        public FileResult GetUserPicture(int? id)
+        public async Task<FileResult> GetUserPicture(int? id)
         {
             if (id == null)
             {
                 return File("/images/UserImage.png", "image/png");
             }
 
-            var picture = _context.Pictures.FirstOrDefault(p => p.PictureID == id);
+            var picture = await _context.Pictures.FirstOrDefaultAsync(p => p.PictureID == id);
 
             if (picture == null || picture.Data.Length == 0)
             {
