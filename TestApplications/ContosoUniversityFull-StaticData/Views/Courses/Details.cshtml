@@ -1,0 +1,103 @@
+﻿@model ContosoUniversityFull.ViewModels.CourseDetailsViewModel
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+@if (TempData.ContainsKey("Success"))
+{
+    <p class="bg-success">@TempData["Success"]</p>
+}
+
+<div>
+    <h4>Course</h4>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-9">
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Course.CourseID)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Course.CourseID)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Course.Title)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Course.Title)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Course.Credits)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Course.Credits)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Course.Department)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Course.Department.Name)
+                </dd>
+
+            </dl>
+        </div>
+        <div class="col-md-3">
+            @if (ViewBag.StudentId != null)
+            {
+                using (Html.BeginForm("Enroll", "Courses", FormMethod.Post, null))
+                {
+                    @Html.AntiForgeryToken()
+                    int studentId = ViewBag.StudentId;
+
+                    @Html.Hidden("courseId", Model.Course.CourseID)
+                    @Html.Hidden("studentId", studentId)
+                    <input type="submit" value="Enroll for Course" class="btn btn-default" />
+                }
+            }
+
+        </div>
+    </div>
+    <hr />
+</div>
+
+<div>
+    <h4>Other interesting Courses</h4>
+    <hr />
+    <table class="table">
+        <tr>
+            <th>Course Title</th>
+            <th>Credits</th>
+            <th></th>
+        </tr>
+        @foreach (var item in Model.OtherCourses)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Credits)
+                </td>
+                <td>
+                    @Html.ActionLink("Details", "Details", "Courses", new { id = item.CourseID, studentId = ViewBag.StudentId }, null)
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Course.CourseID }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

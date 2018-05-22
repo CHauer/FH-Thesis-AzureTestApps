@@ -1,0 +1,131 @@
+﻿@model ContosoUniversityFull.Models.SchoolViewModels.StudentDashboardViewModel
+
+@{
+    ViewBag.Title = "Student Dashboard";
+}
+
+<h2>Dashboard</h2>
+
+<div>
+    <h4>Student</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-2">
+            <img src="@Url.Action("UserPicture", new { id = Model.Student.PictureID})" alt="User Picture" style="width:100%" />
+        </div>
+        <div class="col-md-10">
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Student.LastName)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Student.LastName)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Student.FirstMidName)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Student.FirstMidName)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Student.EnrollmentDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Student.EnrollmentDate)
+                </dd>
+            </dl>
+        </div>
+    </div>
+    <hr />
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4> @Html.DisplayNameFor(model => model.Student.Enrollments)</h4>
+        <hr />
+        <table class="table">
+            <tr>
+                <th>Course Title</th>
+                <th>Grade</th>
+                <th></th>
+            </tr>
+            @foreach (var item in Model.Student.Enrollments)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Course.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Grade)
+                    </td>
+                    <td>
+                        @Html.ActionLink("Details", "Details", "Courses", new { id = item.CourseID, studentId = Model.Student.ID }, null)
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+
+    <div class="col-md-6">
+        <h4>Student Departments</h4>
+        <hr />
+        <table class="table">
+            <tr>
+                <th>Department</th>
+                <th>Start Date</th>
+            </tr>
+            @foreach (var item in Model.StudentDepartments)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StartDate)
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+<div>
+    <h4>Other interesting Courses</h4>
+    <hr />
+    <table class="table">
+        <tr>
+            <th>Course Title</th>
+            <th>Credits</th>
+            <th></th>
+        </tr>
+        @foreach (var item in Model.SuggestedCourses)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Credits)
+                </td>
+                <td>
+                    @Html.ActionLink("Details", "Details", "Courses", new { id = item.CourseID, studentId = Model.Student.ID }, null)
+                </td>
+            </tr>
+        }
+    </table>
+    <a class="btn btn-default" href="@Url.Action("Index", "Courses", new {studentId = Model.Student.ID})">Search Courses</a>
+    <hr />
+</div>
+
+
+
+<p>
+    @Html.ActionLink("Details", "Details", new { id = Model.Student.ID }) |
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Student.ID }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
