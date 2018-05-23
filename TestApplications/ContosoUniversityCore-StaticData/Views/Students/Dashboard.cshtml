@@ -11,7 +11,14 @@
     <hr />
     <div class="row">
         <div class="col-md-2">
-            <img src="@Url.Action("UserPicture", new { id = Model.Student.PictureID})" alt="User Picture" style="width:100%" />
+            @if (Model.Student.UserPicture != null)
+            {
+                <img src="@Model.Student.UserPicture.PictureUrl" alt="User Picture" style="width: 100%" />
+            }
+            else
+            {
+                <img src="~/images/UserImage.png" alt="User Picture" style="width: 100%" />
+            }
         </div>
         <div class="col-md-10">
             <dl class="dl-horizontal">

@@ -18,16 +18,20 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Transforms;
 using SixLabors.Primitives;
+using ContosoUniversityCore.Services;
 
 namespace ContosoUniversityCore.Controllers
 {
     public class StudentsController : Controller
     {
-        private readonly SchoolContext _context;
+        private readonly SchoolContext context;
 
-        public StudentsController(SchoolContext context)
+        private readonly IUserPictureService userPictureService;
+
+        public StudentsController(SchoolContext context, IUserPictureService userPictureService)
         {
-            _context = context;
+            this.context = context;
+            this.userPictureService = userPictureService;
         }
 
         // GET: Students
@@ -52,8 +56,8 @@ namespace ContosoUniversityCore.Controllers
 
             ViewData["CurrentFilter"] = searchString;
 
-            var students = from s in _context.Students
-                           select s;
+            var students = context.Students.Include(s => s.UserPicture).AsQueryable();
+
             if (!String.IsNullOrEmpty(searchString))
             {
                 students = students.Where(s => s.LastName.Contains(searchString)
@@ -86,11 +90,11 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Students
-                .Include(s => s.Enrollments)
-                    .ThenInclude(e => e.Course)
-                .AsNoTracking()
-                .SingleOrDefaultAsync(m => m.ID == id);
+            var student = await context.Students.Include(s => s.UserPicture)
+                              .Include(s => s.Enrollments)
+                              .ThenInclude(e => e.Course)
+                              .AsNoTracking()
+                              .SingleOrDefaultAsync(m => m.ID == id);
 
             if (student == null)
             {
@@ -119,7 +123,7 @@ namespace ContosoUniversityCore.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var userPicture = await HandleUserPictureUpload(picture);
+                    var userPicture = await userPictureService.CreateUserPictureAsync(picture);
 
                     if (userPicture != null)
                     {
@@ -127,8 +131,8 @@ namespace ContosoUniversityCore.Controllers
 
                     }
 
-                    _context.Add(student);
-                    await _context.SaveChangesAsync();
+                    context.Add(student);
+                    await context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -142,44 +146,6 @@ namespace ContosoUniversityCore.Controllers
             return View(student);
         }
 
-        private async Task<Picture> HandleUserPictureUpload(IFormFile picture)
-        {
-            if (picture != null && picture.Length > 0)
-            {
-                var userPicture = new Picture()
-                {
-                    ContentType = picture.ContentType
-                };
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await picture.CopyToAsync(memoryStream);
-                    userPicture.OriginalData = memoryStream.ToArray();
-                }
-                userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
-                userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
-
-                return userPicture;
-            }
-
-            return null;
-        }
-
-        private byte[] GeneratePicture(byte[] inputData, int width, int height)
-        {
-            using (Image<Rgba32> image = Image.Load(inputData))
-            {
-                image.Mutate(x => x.Resize(new ResizeOptions() { Mode = ResizeMode.Crop, Size = new Size(width, height) }));
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    image.SaveAsJpeg(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-
-        }
-
         // GET: Students/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -188,7 +154,7 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Students.SingleOrDefaultAsync(m => m.ID == id);
+            var student = await context.Students.Include(s => s.UserPicture).SingleOrDefaultAsync(m => m.ID == id);
             if (student == null)
             {
                 return NotFound();
@@ -207,14 +173,14 @@ namespace ContosoUniversityCore.Controllers
             {
                 return NotFound();
             }
-            var studentToUpdate = await _context.Students.SingleOrDefaultAsync(s => s.ID == id);
+            var studentToUpdate = await context.Students.SingleOrDefaultAsync(s => s.ID == id);
             if (await TryUpdateModelAsync<Student>(
                 studentToUpdate,
                 "",
                 s => s.FirstMidName, s => s.LastName, s => s.EnrollmentDate))
             {
 
-                var userPicture = await HandleUserPictureUpload(picture);
+                var userPicture = await userPictureService.CreateUserPictureAsync(picture);
 
                 if (userPicture != null)
                 {
@@ -223,7 +189,7 @@ namespace ContosoUniversityCore.Controllers
 
                 try
                 {
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
                     return RedirectToAction(nameof(Details), new { id });
                 }
                 catch (DbUpdateException /* ex */)
@@ -244,7 +210,7 @@ namespace ContosoUniversityCore.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Students
+            var student = await context.Students
                 .AsNoTracking()
                 .SingleOrDefaultAsync(m => m.ID == id);
             if (student == null)
@@ -267,7 +233,7 @@ namespace ContosoUniversityCore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var student = await _context.Students
+            var student = await context.Students
                 .AsNoTracking()
                 .SingleOrDefaultAsync(m => m.ID == id);
             if (student == null)
@@ -277,8 +243,8 @@ namespace ContosoUniversityCore.Controllers
 
             try
             {
-                _context.Students.Remove(student);
-                await _context.SaveChangesAsync();
+                context.Students.Remove(student);
+                await context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
             catch (DbUpdateException /* ex */)
@@ -290,32 +256,32 @@ namespace ContosoUniversityCore.Controllers
 
         private bool StudentExists(int id)
         {
-            return _context.Students.Any(e => e.ID == id);
+            return context.Students.Any(e => e.ID == id);
         }
 
         public async Task<IActionResult> Dashboard(int id)
         {
             StudentDashboardViewModel model = new StudentDashboardViewModel();
 
-            model.Student = await _context.Students
-                              .Include(s => s.Enrollments)
-                              .ThenInclude(e => e.Course)
-                              .AsNoTracking()
-                              .SingleOrDefaultAsync(m => m.ID == id);
+            model.Student = await context.Students.Include(s => s.UserPicture)
+                                .Include(s => s.Enrollments)
+                                .ThenInclude(e => e.Course)
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(m => m.ID == id);
 
             ViewBag.StudentId = id;
 
-            model.SuggestedCourses = _context.Courses
+            model.SuggestedCourses = context.Courses
                 .Where(c => c.Enrollments.All(e => e.StudentID != id))
                 .OrderBy(c => c.Enrollments.Count)
                 .Take(10)
                 .AsNoTracking().ToList();
 
-            var departmentIds = _context.Enrollments
+            var departmentIds = context.Enrollments
                 .Where(e => e.StudentID == id)
                 .Select(e => e.Course.DepartmentID).Distinct();
 
-            model.StudentDepartments = _context.Departments.Where(d => departmentIds.Contains(d.DepartmentID)).AsNoTracking().ToList();
+            model.StudentDepartments = context.Departments.Where(d => departmentIds.Contains(d.DepartmentID)).AsNoTracking().ToList();
 
             if (model.Student == null)
             {
@@ -326,21 +292,22 @@ namespace ContosoUniversityCore.Controllers
         }
 
         [ActionName("UserPicture")]
-        public FileResult GetUserPicture(int? id)
+        [Obsolete("Use Urls in Picture Model")]
+        public IActionResult GetUserPicture(int? id)
         {
             if (id == null)
             {
                 return File("/images/UserImage.png", "image/png");
             }
 
-            var picture = _context.Pictures.FirstOrDefault(p => p.PictureID == id);
+            var picture = context.Pictures.FirstOrDefault(p => p.PictureID == id);
 
-            if (picture == null || picture.Data.Length == 0)
+            if (picture == null || string.IsNullOrEmpty(picture.PictureUrl))
             {
                 return File("/images/UserImage.png", "image/png");
             }
 
-            return File(picture.Data, "image/jpg");
+            return new RedirectResult(picture.PictureUrl);
         }
     }
 }

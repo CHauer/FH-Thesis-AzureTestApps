@@ -1,3 +1,4 @@
+using ContosoUniversityFull.Services;
 using System;
 
 using Unity;
@@ -42,6 +43,7 @@ namespace ContosoUniversityFull
 
             // TODO: Register your type's mappings here.
             // container.RegisterType<IProductRepository, ProductRepository>();
+            container.RegisterType<IUserPictureService, UserPictureService>();
         }
     }
 }

@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <ApplicationInsightsResourceId>/subscriptions/c4b66ffa-34ea-49f2-8f74-115730b66de1/resourcegroups/Master-TestAppB/providers/microsoft.insights/components/TestAppB-Default</ApplicationInsightsResourceId>
-    <ApplicationInsightsAnnotationResourceId>/subscriptions/c4b66ffa-34ea-49f2-8f74-115730b66de1/resourcegroups/Master-TestAppB/providers/microsoft.insights/components/TestAppB-Default</ApplicationInsightsAnnotationResourceId>
+    <ApplicationInsightsResourceId>/subscriptions/729fc49c-a355-4598-b417-c684918fff58/resourcegroups/Master-TestApp-Caching/providers/microsoft.insights/components/tesappb-caching</ApplicationInsightsResourceId>
+    <ApplicationInsightsAnnotationResourceId>/subscriptions/729fc49c-a355-4598-b417-c684918fff58/resourceGroups/Master-TestApp-Caching/providers/microsoft.insights/components/tesappb-caching</ApplicationInsightsAnnotationResourceId>
   </PropertyGroup>
 
   <ItemGroup>

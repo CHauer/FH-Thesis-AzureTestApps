@@ -23,8 +23,8 @@
     <Use64BitIISExpress />
     <UseGlobalApplicationHostFile />
     <TargetFrameworkProfile />
-    <ApplicationInsightsResourceId>/subscriptions/4b679091-a22f-42f8-b946-9b2b475f3ad3/resourcegroups/Master-TestAppA/providers/microsoft.insights/components/TestAppA-Default</ApplicationInsightsResourceId>
-    <ApplicationInsightsAnnotationResourceId>/subscriptions/4b679091-a22f-42f8-b946-9b2b475f3ad3/resourcegroups/Master-TestAppA/providers/microsoft.insights/components/TestAppA-Default</ApplicationInsightsAnnotationResourceId>
+    <ApplicationInsightsResourceId>/subscriptions/729fc49c-a355-4598-b417-c684918fff58/resourcegroups/Master-TestApp-Caching/providers/microsoft.insights/components/testappa-caching</ApplicationInsightsResourceId>
+    <ApplicationInsightsAnnotationResourceId>/subscriptions/729fc49c-a355-4598-b417-c684918fff58/resourceGroups/Master-TestApp-Caching/providers/microsoft.insights/components/testappa-caching</ApplicationInsightsAnnotationResourceId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

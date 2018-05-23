@@ -22,6 +22,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Transforms;
 using SixLabors.Primitives;
+using ContosoUniversityFull.Services;
 
 namespace ContosoUniversityFull.Controllers
 {
@@ -29,9 +30,12 @@ namespace ContosoUniversityFull.Controllers
     {
         private readonly SchoolContext db;
 
-        public StudentsController(SchoolContext db)
+        private readonly IUserPictureService userPictureService;
+
+        public StudentsController(SchoolContext db, IUserPictureService userPictureService)
         {
             this.db = db;
+            this.userPictureService = userPictureService;
         }
 
         // GET: Student
@@ -52,8 +56,8 @@ namespace ContosoUniversityFull.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var students = from s in db.Students
-                           select s;
+            var students = db.Students.Include(s => s.UserPicture).AsQueryable();
+
             if (!String.IsNullOrEmpty(searchString))
             {
                 students = students.Where(s => s.LastName.Contains(searchString)
@@ -81,13 +85,15 @@ namespace ContosoUniversityFull.Controllers
         }
 
         // GET: Student/Details/5
-        public ActionResult Details(int? id)
+        public async Task<ActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+
+            Student student = await db.Students.Include(s => s.UserPicture).SingleOrDefaultAsync(s => s.ID == id);
+
             if (student == null)
             {
                 return HttpNotFound();
@@ -108,13 +114,13 @@ namespace ContosoUniversityFull.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "LastName, FirstMidName, EnrollmentDate")]Student student, HttpPostedFileBase picture)
+        public async Task<ActionResult> Create([Bind(Include = "LastName, FirstMidName, EnrollmentDate")]Student student, HttpPostedFileBase picture)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    var userPicture = HandleUserPictureUpload(picture);
+                    var userPicture = await userPictureService.CreateUserPictureAsync(picture);
 
                     if (userPicture != null)
                     {
@@ -134,51 +140,15 @@ namespace ContosoUniversityFull.Controllers
             return View(student);
         }
 
-        private Picture HandleUserPictureUpload(HttpPostedFileBase picture)
-        {
-            if (picture != null && picture.ContentLength > 0)
-            {
-                var userPicture = new Picture()
-                {
-                    ContentType = picture.ContentType
-                };
-
-                using (var reader = new BinaryReader(picture.InputStream))
-                {
-                    userPicture.OriginalData = reader.ReadBytes(picture.ContentLength);
-                }
-
-                userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
-                userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
-
-                return userPicture;
-            }
-            return null;
-        }
-
-        private byte[] GeneratePicture(byte[] inputData, int width, int height)
-        {
-            using (Image<Rgba32> image = Image.Load(inputData))
-            {
-                image.Mutate(x => x.Resize(new ResizeOptions() { Mode = ResizeMode.Crop, Size = new Size(width, height) }));
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    image.SaveAsJpeg(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-
-        }
-
         // GET: Student/Edit/5
-        public ActionResult Edit(int? id)
+        public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+
+            Student student = await db.Students.Include(s => s.UserPicture).SingleOrDefaultAsync(s => s.ID == id);
             if (student == null)
             {
                 return HttpNotFound();
@@ -191,7 +161,7 @@ namespace ContosoUniversityFull.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public ActionResult EditPost(int? id, HttpPostedFileBase picture)
+        public async Task<ActionResult> EditPost(int? id, HttpPostedFileBase picture)
         {
             if (id == null)
             {
@@ -201,7 +171,7 @@ namespace ContosoUniversityFull.Controllers
             if (TryUpdateModel(studentToUpdate, "",
                new string[] { "LastName", "FirstMidName", "EnrollmentDate" }))
             {
-                var userPicture = HandleUserPictureUpload(picture);
+                var userPicture = await userPictureService.CreateUserPictureAsync(picture);
 
                 if (userPicture != null)
                 {
@@ -266,6 +236,7 @@ namespace ContosoUniversityFull.Controllers
             StudentDashboardViewModel model = new StudentDashboardViewModel();
 
             model.Student = await db.Students
+                                .Include(s => s.UserPicture)
                                 .Include(s => s.Enrollments)
                                 .Include(s => s.Enrollments.Select(e => e.Course))
                                 .AsNoTracking()
@@ -296,6 +267,7 @@ namespace ContosoUniversityFull.Controllers
         }
 
         [ActionName("UserPicture")]
+        [Obsolete("Use Urls in Picture Model")]
         public FileResult GetUserPicture(int? id)
         {
             if (id == null)

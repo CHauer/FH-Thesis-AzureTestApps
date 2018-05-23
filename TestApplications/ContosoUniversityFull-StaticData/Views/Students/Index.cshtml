@@ -15,7 +15,7 @@
 {
     <p>
         Find by name: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
-        <input type="submit" value="Search" class="btn btn-default"  /> |
+        <input type="submit" value="Search" class="btn btn-default" /> |
         @Html.ActionLink("Back to Full List", "Index", "Students")
     </p>
 }
@@ -39,7 +39,14 @@
     {
         <tr>
             <td>
-                <img src="@Url.Action("UserPicture", new {id = item.PictureID})" alt="User Picture" style="max-width:50px; max-height:50px;" />
+                @if (item.UserPicture != null)
+                {
+                    <img src="@item.UserPicture.ThumbnailUrl" alt="User Picture" style="max-width: 50px; max-height: 50px;" />
+                }
+                else
+                {
+                    <img src="~/Content/UserImage.png" alt="User Picture" style="max-width: 50px; max-height: 50px;" />
+                }
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.LastName)
@@ -61,7 +68,7 @@
 
 </table>
 <br />
-Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
 
-@Html.PagedListPager(Model, page => Url.Action("Index",
-    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+        new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))

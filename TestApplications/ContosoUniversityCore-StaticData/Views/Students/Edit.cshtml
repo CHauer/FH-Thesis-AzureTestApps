@@ -40,7 +40,14 @@
         </form>
     </div>
     <div class="col-md-1">
-        <img src="@Url.Action("UserPicture", new {id= Model.PictureID})" alt="User Picure" style="width:100%;" />
+        @if (Model.UserPicture != null)
+        {
+            <img src="@Model.UserPicture.PictureUrl" alt="User Picture" style="width: 100%" />
+        }
+        else
+        {
+            <img src="~/images/UserImage.png" alt="User Picture" style="width: 100%" />
+        }
     </div>
 </div>
 
