@@ -1,3 +1,4 @@
+using ContosoUniversityFull.Services;
 using System;
 
 using Unity;
@@ -41,7 +42,9 @@ namespace ContosoUniversityFull
             // container.LoadConfiguration();
 
             // TODO: Register your type's mappings here.
-            // container.RegisterType<IProductRepository, ProductRepository>();
+            container.RegisterType<IQueueSendClient<PictureJob>, QueueSendClient<PictureJob>>();
+            container.RegisterType<IUserPictureService, UserPictureService>();
+
         }
     }
 }

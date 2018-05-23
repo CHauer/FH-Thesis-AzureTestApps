@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 
-namespace GenerateImageWebJob
+namespace GenerateImageWebJobFull
 {
     // To learn more about Microsoft Azure WebJobs SDK, please see https://go.microsoft.com/fwlink/?LinkID=320976
     class Program
@@ -20,6 +20,7 @@ namespace GenerateImageWebJob
             {
                 config.UseDevelopmentSettings();
             }
+            config.Queues.MaxPollingInterval = TimeSpan.FromSeconds(3);
 
             var host = new JobHost(config);
             // The following code ensures that the WebJob will be running continuously

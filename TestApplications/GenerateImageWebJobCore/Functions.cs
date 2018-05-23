@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ContosoUniversityFull.DAL;
+using ContosoUniversityCore.Data;
 using Microsoft.Azure.WebJobs;
 
-namespace GenerateImageWebJobFull
+namespace GenerateImageWebJobCore
 {
     public class Functions
     {

@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using ContosoUniversityFull.DAL;
 using ContosoUniversityFull.Models;
 using ContosoUniversityFull.Models.SchoolViewModels;
+using ContosoUniversityFull.Services;
 
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -29,9 +30,12 @@ namespace ContosoUniversityFull.Controllers
     {
         private readonly SchoolContext db;
 
-        public StudentsController(SchoolContext db)
+        private readonly IUserPictureService userPictureService;
+
+        public StudentsController(SchoolContext db, IUserPictureService userPictureService)
         {
             this.db = db;
+            this.userPictureService = userPictureService;
         }
 
         // GET: Student
@@ -108,7 +112,7 @@ namespace ContosoUniversityFull.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "LastName, FirstMidName, EnrollmentDate")]Student student, HttpPostedFileBase picture)
+        public async Task<ActionResult> Create([Bind(Include = "LastName, FirstMidName, EnrollmentDate")]Student student, HttpPostedFileBase picture)
         {
             try
             {
@@ -123,6 +127,9 @@ namespace ContosoUniversityFull.Controllers
 
                     db.Students.Add(student);
                     db.SaveChanges();
+
+                    await userPictureService.EnqueuePictureJobAsync(student.UserPicture.PictureID);
+
                     return RedirectToAction("Index");
                 }
             }
@@ -148,27 +155,9 @@ namespace ContosoUniversityFull.Controllers
                     userPicture.OriginalData = reader.ReadBytes(picture.ContentLength);
                 }
 
-                userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
-                userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
-
                 return userPicture;
             }
             return null;
-        }
-
-        private byte[] GeneratePicture(byte[] inputData, int width, int height)
-        {
-            using (Image<Rgba32> image = Image.Load(inputData))
-            {
-                image.Mutate(x => x.Resize(new ResizeOptions() { Mode = ResizeMode.Crop, Size = new Size(width, height) }));
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    image.SaveAsJpeg(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-
         }
 
         // GET: Student/Edit/5
@@ -191,7 +180,7 @@ namespace ContosoUniversityFull.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public ActionResult EditPost(int? id, HttpPostedFileBase picture)
+        public async Task<ActionResult> EditPost(int? id, HttpPostedFileBase picture)
         {
             if (id == null)
             {
@@ -211,6 +200,11 @@ namespace ContosoUniversityFull.Controllers
                 try
                 {
                     db.SaveChanges();
+
+                    if (userPicture != null)
+                    {
+                        await userPictureService.EnqueuePictureJobAsync(studentToUpdate.UserPicture.PictureID);
+                    }
 
                     return RedirectToAction(nameof(Details), new { id });
                 }
