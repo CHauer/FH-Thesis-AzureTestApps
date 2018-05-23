@@ -1,4 +1,5 @@
 using ContosoUniversityFull.DAL;
+using ContosoUniversityFull.Services;
 using System;
 using System.Linq;
 
@@ -48,6 +49,7 @@ namespace GenerateImageWebJobFull.Infrastructure
 
             // Register project specific types here
             containerConfig.RegisterType<SchoolContext>(new PerResolveLifetimeManager());
+            containerConfig.RegisterType<IUserPictureService, UserPictureService>();
         }
     }
 }

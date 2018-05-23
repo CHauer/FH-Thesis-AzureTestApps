@@ -42,7 +42,7 @@ namespace ContosoUniversityFull
             // container.LoadConfiguration();
 
             // TODO: Register your type's mappings here.
-            container.RegisterType<IQueueSendClient<PictureJob>, QueueSendClient<PictureJob>>();
+            container.RegisterType(typeof(IQueueSendClient<>), typeof(QueueSendClient<>));
             container.RegisterType<IUserPictureService, UserPictureService>();
 
         }

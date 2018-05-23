@@ -5,24 +5,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ContosoUniversityFull.DAL;
+using ContosoUniversityFull.Services;
 using Microsoft.Azure.WebJobs;
 
 namespace GenerateImageWebJobFull
 {
     public class Functions
     {
-        private readonly SchoolContext context;
+        private readonly IUserPictureService userPictureService;
 
-        public Functions(SchoolContext context)
+        public Functions(IUserPictureService userPictureService)
         {
-            this.context = context;
+
+            this.userPictureService = userPictureService;
         }
 
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called queue.
-        public void ProcessQueueMessage([QueueTrigger("queueappa")] string message, TextWriter log)
+        public async Task ProcessQueueMessage([QueueTrigger("queueappa")] PictureJob job, TextWriter log)
         {
-            log.WriteLine(message);
+            await userPictureService.GenerateUserPicture(job.PictureId);
         }
     }
 }

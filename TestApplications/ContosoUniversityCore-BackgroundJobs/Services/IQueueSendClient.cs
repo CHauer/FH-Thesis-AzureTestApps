@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ContosoUniversityCore.Services
 {
@@ -9,6 +10,6 @@ namespace ContosoUniversityCore.Services
         /// Enqueues the message.
         /// </summary>
         /// <param name="message">The message.</param>
-        void EnqueueMessage(T message);
+        Task EnqueueMessageAsync(T message);
     }
 }

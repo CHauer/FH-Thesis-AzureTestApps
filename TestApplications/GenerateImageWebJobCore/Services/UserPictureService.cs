@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-
-using ContosoUniversityFull.DAL;
-using ContosoUniversityFull.Models;
+using ContosoUniversityCore.Data;
+using ContosoUniversityCore.Models;
+using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Transforms;
 using SixLabors.Primitives;
 
-namespace ContosoUniversityFull.Services
+namespace GenerateImageWebJobCore.Services
 {
     public class UserPictureService : IUserPictureService
     {
@@ -26,7 +25,7 @@ namespace ContosoUniversityFull.Services
 
         public async Task GenerateUserPicture(int pictureId)
         {
-            var userPicture = await context.Pictures.SingleOrDefaultAsync(p => p.PictureID == pictureId);
+            var userPicture = await context.Pictures.SingleOrDefaultAsync(p => p.PictureID == pictureId).ConfigureAwait(false);
 
             if (userPicture == null)
             {
@@ -36,7 +35,7 @@ namespace ContosoUniversityFull.Services
             userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
             userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         private byte[] GeneratePicture(byte[] inputData, int width, int height)

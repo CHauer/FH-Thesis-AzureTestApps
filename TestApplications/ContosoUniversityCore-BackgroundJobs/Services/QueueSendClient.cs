@@ -8,6 +8,7 @@ using System.Linq;
 using System.Web;
 
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace ContosoUniversityCore.Services
 {
@@ -73,10 +74,10 @@ namespace ContosoUniversityCore.Services
         /// Enqueues the message.
         /// </summary>
         /// <param name="message">The message.</param>
-        public void EnqueueMessage(T message)
+        public Task EnqueueMessageAsync(T message)
         {
             var queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(message));
-            this.requestQueue.AddMessageAsync(queueMessage);
+            return this.requestQueue.AddMessageAsync(queueMessage);
         }
 
         /// <summary>

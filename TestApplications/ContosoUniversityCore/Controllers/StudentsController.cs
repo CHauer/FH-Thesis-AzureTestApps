@@ -326,21 +326,33 @@ namespace ContosoUniversityCore.Controllers
         }
 
         [ActionName("UserPicture")]
-        public async Task<FileResult> GetUserPicture(int? id)
+        public async Task<FileResult> GetUserPicture(int? id, string type = "default")
         {
-            if (id == null)
+            if (id == null || string.IsNullOrWhiteSpace(type))
             {
                 return File("/images/UserImage.png", "image/png");
             }
 
-            var picture = await _context.Pictures.FirstOrDefaultAsync(p => p.PictureID == id);
+            byte[] pictureData = null;
 
-            if (picture == null || picture.Data.Length == 0)
+            IQueryable<Picture> pictureQuery = _context.Pictures.Where(p => p.PictureID == id);
+
+            switch (type)
+            {
+                case "thumbnail":
+                    pictureData = await pictureQuery.Select(p => p.ThumbnailData).FirstOrDefaultAsync();
+                    break;
+                default:
+                    pictureData = await pictureQuery.Select(p => p.Data).FirstOrDefaultAsync();
+                    break;
+            }
+
+            if (pictureData == null || pictureData.Length == 0)
             {
                 return File("/images/UserImage.png", "image/png");
             }
 
-            return File(picture.Data, "image/jpg");
+            return File(pictureData, "image/jpg");
         }
     }
 }

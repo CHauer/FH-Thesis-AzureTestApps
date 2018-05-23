@@ -1,11 +1,11 @@
-﻿using ContosoUniversityFull.Models;
+﻿using ContosoUniversityCore.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace ContosoUniversityFull.Services
+namespace GenerateImageWebJobCore.Services
 {
     public interface IUserPictureService
     {

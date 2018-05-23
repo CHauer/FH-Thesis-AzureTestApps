@@ -30,12 +30,12 @@ namespace ContosoUniversityFull.Controllers
     {
         private readonly SchoolContext db;
 
-        private readonly IUserPictureService userPictureService;
+        private readonly IQueueSendClient<PictureJob> queueClient;
 
-        public StudentsController(SchoolContext db, IUserPictureService userPictureService)
+        public StudentsController(SchoolContext db, IQueueSendClient<PictureJob> queueClient)
         {
             this.db = db;
-            this.userPictureService = userPictureService;
+            this.queueClient = queueClient;
         }
 
         // GET: Student
@@ -128,7 +128,10 @@ namespace ContosoUniversityFull.Controllers
                     db.Students.Add(student);
                     db.SaveChanges();
 
-                    await userPictureService.EnqueuePictureJobAsync(student.UserPicture.PictureID);
+                    if (student.UserPicture != null)
+                    {
+                        await EnqueuePictureJobAsync(student.UserPicture.PictureID);
+                    }
 
                     return RedirectToAction("Index");
                 }
@@ -139,6 +142,16 @@ namespace ContosoUniversityFull.Controllers
                 ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
             }
             return View(student);
+        }
+
+        public async Task EnqueuePictureJobAsync(int pictureId)
+        {
+            var load = new PictureJob()
+            {
+                PictureId = pictureId,
+            };
+
+            await queueClient.EnqueueMessageAsync(load);
         }
 
         private Picture HandleUserPictureUpload(HttpPostedFileBase picture)
@@ -201,9 +214,9 @@ namespace ContosoUniversityFull.Controllers
                 {
                     db.SaveChanges();
 
-                    if (userPicture != null)
+                    if (studentToUpdate.UserPicture != null)
                     {
-                        await userPictureService.EnqueuePictureJobAsync(studentToUpdate.UserPicture.PictureID);
+                        await EnqueuePictureJobAsync(studentToUpdate.UserPicture.PictureID);
                     }
 
                     return RedirectToAction(nameof(Details), new { id });
@@ -290,21 +303,33 @@ namespace ContosoUniversityFull.Controllers
         }
 
         [ActionName("UserPicture")]
-        public FileResult GetUserPicture(int? id)
+        public async Task<FileResult> GetUserPicture(int? id, string type = "default")
         {
-            if (id == null)
+            if (id == null || string.IsNullOrWhiteSpace(type))
             {
                 return File("/Content/UserImage.png", "image/png");
             }
 
-            var picture = db.Pictures.FirstOrDefault(p => p.PictureID == id);
+            byte[] pictureData = null;
 
-            if (picture == null || picture.Data.Length == 0)
+            IQueryable<Picture> pictureQuery = db.Pictures.Where(p => p.PictureID == id);
+
+            switch (type)
+            {
+                case "thumbnail":
+                    pictureData = await pictureQuery.Select(p => p.ThumbnailData).FirstOrDefaultAsync();
+                    break;
+                default:
+                    pictureData = await pictureQuery.Select(p => p.Data).FirstOrDefaultAsync();
+                    break;
+            }
+
+            if (pictureData == null || pictureData.Length == 0)
             {
                 return File("/Content/UserImage.png", "image/png");
             }
 
-            return File(picture.Data, "image/jpg");
+            return File(pictureData, "image/jpg");
         }
 
         protected override void Dispose(bool disposing)

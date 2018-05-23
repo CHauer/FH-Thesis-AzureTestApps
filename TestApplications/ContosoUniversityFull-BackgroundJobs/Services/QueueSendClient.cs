@@ -68,10 +68,10 @@ namespace ContosoUniversityFull.Services
         /// Enqueues the message.
         /// </summary>
         /// <param name="message">The message.</param>
-        public async Task EnqueueMessageAsync(T message)
+        public Task EnqueueMessageAsync(T message)
         {
             var queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(message));
-            await this.requestQueue.AddMessageAsync(queueMessage);
+            return this.requestQueue.AddMessageAsync(queueMessage);
         }
 
         /// <summary>

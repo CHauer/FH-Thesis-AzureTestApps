@@ -18,6 +18,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Transforms;
 using SixLabors.Primitives;
+using ContosoUniversityCore.Services;
 
 namespace ContosoUniversityCore.Controllers
 {
@@ -25,9 +26,12 @@ namespace ContosoUniversityCore.Controllers
     {
         private readonly SchoolContext _context;
 
-        public StudentsController(SchoolContext context)
+        private readonly IQueueSendClient<PictureJob> queueClient;
+
+        public StudentsController(SchoolContext context, IQueueSendClient<PictureJob> queueClient)
         {
             _context = context;
+            this.queueClient = queueClient;
         }
 
         // GET: Students
@@ -129,6 +133,12 @@ namespace ContosoUniversityCore.Controllers
 
                     _context.Add(student);
                     await _context.SaveChangesAsync();
+
+                    if (student.UserPicture != null)
+                    {
+                        await EnqueuePictureJobAsync(student.UserPicture.PictureID);
+                    }
+
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -141,6 +151,17 @@ namespace ContosoUniversityCore.Controllers
             }
             return View(student);
         }
+
+        public async Task EnqueuePictureJobAsync(int pictureId)
+        {
+            var load = new PictureJob()
+            {
+                PictureId = pictureId,
+            };
+
+            await queueClient.EnqueueMessageAsync(load);
+        }
+
 
         private async Task<Picture> HandleUserPictureUpload(IFormFile picture)
         {
@@ -156,28 +177,11 @@ namespace ContosoUniversityCore.Controllers
                     await picture.CopyToAsync(memoryStream);
                     userPicture.OriginalData = memoryStream.ToArray();
                 }
-                userPicture.Data = GeneratePicture(userPicture.OriginalData, 250, 350);
-                userPicture.ThumbnailData = GeneratePicture(userPicture.OriginalData, 50, 50);
 
                 return userPicture;
             }
 
             return null;
-        }
-
-        private byte[] GeneratePicture(byte[] inputData, int width, int height)
-        {
-            using (Image<Rgba32> image = Image.Load(inputData))
-            {
-                image.Mutate(x => x.Resize(new ResizeOptions() { Mode = ResizeMode.Crop, Size = new Size(width, height) }));
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    image.SaveAsJpeg(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-
         }
 
         // GET: Students/Edit/5
@@ -224,6 +228,12 @@ namespace ContosoUniversityCore.Controllers
                 try
                 {
                     await _context.SaveChangesAsync();
+
+                    if (studentToUpdate.UserPicture != null)
+                    {
+                        await EnqueuePictureJobAsync(studentToUpdate.UserPicture.PictureID);
+                    }
+
                     return RedirectToAction(nameof(Details), new { id });
                 }
                 catch (DbUpdateException /* ex */)
@@ -326,21 +336,33 @@ namespace ContosoUniversityCore.Controllers
         }
 
         [ActionName("UserPicture")]
-        public FileResult GetUserPicture(int? id)
+        public async Task<FileResult> GetUserPicture(int? id, string type = "default")
         {
-            if (id == null)
+            if (id == null || string.IsNullOrWhiteSpace(type))
             {
                 return File("/images/UserImage.png", "image/png");
             }
 
-            var picture = _context.Pictures.FirstOrDefault(p => p.PictureID == id);
+            byte[] pictureData = null;
 
-            if (picture == null || picture.Data.Length == 0)
+            IQueryable<Picture> pictureQuery = _context.Pictures.Where(p => p.PictureID == id);
+
+            switch (type)
+            {
+                case "thumbnail":
+                    pictureData = await pictureQuery.Select(p => p.ThumbnailData).FirstOrDefaultAsync();
+                    break;
+                default:
+                    pictureData = await pictureQuery.Select(p => p.Data).FirstOrDefaultAsync();
+                    break;
+            }
+
+            if (pictureData == null || pictureData.Length == 0)
             {
                 return File("/images/UserImage.png", "image/png");
             }
 
-            return File(picture.Data, "image/jpg");
+            return File(pictureData, "image/jpg");
         }
     }
 }

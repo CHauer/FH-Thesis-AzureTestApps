@@ -1,28 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ContosoUniversityCore.Data;
+using ContosoUniversityCore.Services;
+using GenerateImageWebJobCore.Services;
 using Microsoft.Azure.WebJobs;
 
 namespace GenerateImageWebJobCore
 {
     public class Functions
     {
-        private readonly SchoolContext context;
+        private readonly IUserPictureService userPictureService;
 
-        public Functions(SchoolContext context)
+        public Functions(IUserPictureService userPictureService)
         {
-            this.context = context;
+            this.userPictureService = userPictureService;
         }
 
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called queue.
-        public void ProcessQueueMessage([QueueTrigger("queueappa")] string message, TextWriter log)
+        public async Task ProcessQueueMessage([QueueTrigger("queueappb")] PictureJob job, TextWriter log)
         {
-            log.WriteLine(message);
+            try
+            {
+                await userPictureService.GenerateUserPicture(job.PictureId);
+                log.WriteLine($"Image proccesed ID:{job.PictureId}");
+            }
+            catch (Exception ex)
+            {
+                log.WriteLine($"Error: {ex.Message}");
+                throw ex;
+            }
         }
     }
 }
