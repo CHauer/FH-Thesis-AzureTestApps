@@ -391,8 +391,8 @@
     </Content>
     <Content Include="Connected Services\Application Insights\ConnectedService.json" />
     <Content Include="Connected Services\fhtestappstorageAzureStorage\ConnectedService.json" />
-    <None Include="Properties\PublishProfiles\TestAppA-Default - Web Deploy.pubxml" />
     <Content Include="Properties\webjobs-list.json" />
+    <None Include="Properties\PublishProfiles\testappa-backgroundjobs - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <None Include="Scripts\jquery-3.3.1-vsdoc.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
