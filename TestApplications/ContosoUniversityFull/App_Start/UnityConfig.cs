@@ -1,6 +1,8 @@
+using ContosoUniversityFull.DAL;
 using System;
 
 using Unity;
+using Unity.AspNet.Mvc;
 
 namespace ContosoUniversityFull
 {
@@ -42,6 +44,7 @@ namespace ContosoUniversityFull
 
             // TODO: Register your type's mappings here.
             // container.RegisterType<IProductRepository, ProductRepository>();
+            container.RegisterType<SchoolContext>(new PerRequestLifetimeManager());
         }
     }
 }

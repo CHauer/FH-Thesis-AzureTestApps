@@ -52,37 +52,52 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="2b-CourseDetailsWithoutEnrollment.webtest">
+    <None Include="2b-A-CourseDetailsWithoutEnrollment.webtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="1b-CreateStudentWithoutPicture.webtest">
+    <None Include="1b-A-CreateStudentWithoutPicture.webtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="1a-CreateStudentWithPicture.webtest">
+    <None Include="1a-A-CreateStudentWithPicture.webtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="2a-CourseDetailsWithEnrollment.webtest">
+    <None Include="2a-A-CourseDetailsWithEnrollment.webtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="3b-SearchCourseWithoutEnrollment.webtest">
+    <None Include="3b-A-SearchCourseWithoutEnrollment.webtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="3a-SearchCourseWithEnrollment.webtest">
+    <None Include="3a-A-SearchCourseWithEnrollment.webtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="4b-CourseDetailsWithoutEnrollment.webtest">
+    <None Include="4b-A-CourseDetailsWithoutEnrollment.webtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="4a-CourseDetailsWithEnrollment.webtest">
+    <None Include="4a-A-CourseDetailsWithEnrollment.webtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="6-StaticPages.webtest">
+    <None Include="6-A-StaticPages.webtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="5-EditProfile.webtest">
+    <None Include="5-A-EditProfile.webtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="TestAppA_LoadTest.loadtest">
+    <None Include="TestAppA-LoadTest-2k.loadtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="TestAppA-LoadTest-Scale-2k.loadtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="TestAppA-LoadTest-Caching-2k.loadtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="TestAppA-LoadTest-BackgroundJobs-2k.loadtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="TestAppA-LoadTest-StaticData-2k.loadtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="TestAppA-LoadTest-4k.loadtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ContosoUniversityCore.Data;
 
 using Microsoft.EntityFrameworkCore;
+using System.Data.SqlClient;
 
 namespace ContosoUniversityCore
 {
@@ -25,8 +26,16 @@ namespace ContosoUniversityCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var conn = new SqlConnectionStringBuilder(Configuration.GetConnectionString("DefaultConnection"))
+            {
+                ConnectRetryCount = 5,
+                ConnectRetryInterval = 2,
+                MaxPoolSize = 500,
+                MinPoolSize = 5
+            };
+
             services.AddDbContext<SchoolContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(conn.ToString(), sqloptions => sqloptions.EnableRetryOnFailure()));
 
             services.AddMvc();
         }
