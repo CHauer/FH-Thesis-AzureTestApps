@@ -1,7 +1,9 @@
+using ContosoUniversityFull.DAL;
 using ContosoUniversityFull.Services;
 using System;
 
 using Unity;
+using Unity.AspNet.Mvc;
 
 namespace ContosoUniversityFull
 {
@@ -44,6 +46,7 @@ namespace ContosoUniversityFull
             // TODO: Register your type's mappings here.
             //container.RegisterType<IStudentDataService, RedisStudentDataService>();
 
+            container.RegisterType<SchoolContext>(new PerRequestLifetimeManager());
             container.RegisterType<IStudentDataService, LocalStudentDataService>();
             container.RegisterType<IPictureDataService, PictureDataService>();
             container.RegisterType<ICourseDataService, CourseDataService>();

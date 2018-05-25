@@ -1,7 +1,9 @@
+using ContosoUniversityFull.DAL;
 using ContosoUniversityFull.Services;
 using System;
 
 using Unity;
+using Unity.AspNet.Mvc;
 
 namespace ContosoUniversityFull
 {
@@ -42,6 +44,8 @@ namespace ContosoUniversityFull
             // container.LoadConfiguration();
 
             // TODO: Register your type's mappings here.
+
+            container.RegisterType<SchoolContext>(new PerRequestLifetimeManager());
             container.RegisterType(typeof(IQueueSendClient<>), typeof(QueueSendClient<>));
             container.RegisterType<IUserPictureService, UserPictureService>();
 

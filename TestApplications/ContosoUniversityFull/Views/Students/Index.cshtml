@@ -39,7 +39,7 @@
     {
         <tr>
             <td>
-                <img src="@Url.Action("UserPicture", new {id = item.PictureID})" alt="User Picture" style="max-width:50px; max-height:50px;" />
+                <img src="@Url.Action("UserPicture", new {id = item.PictureID, type="thumbnail"})" alt="User Picture" style="max-width:50px; max-height:50px;" />
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.LastName)

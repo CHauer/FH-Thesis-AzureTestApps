@@ -82,6 +82,9 @@
     <None Include="5-A-EditProfile.webtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Load 500User\TestAppA-LoadTest-500.loadtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="TestAppA-LoadTest-2k.loadtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -296,21 +296,33 @@ namespace ContosoUniversityFull.Controllers
         }
 
         [ActionName("UserPicture")]
-        public FileResult GetUserPicture(int? id)
+        public async Task<FileResult> GetUserPicture(int? id, string type = "default")
         {
-            if (id == null)
+            if (id == null || string.IsNullOrWhiteSpace(type))
             {
                 return File("/Content/UserImage.png", "image/png");
             }
 
-            var picture = db.Pictures.FirstOrDefault(p => p.PictureID == id);
+            byte[] pictureData = null;
 
-            if (picture == null || picture.Data.Length == 0)
+            IQueryable<Picture> pictureQuery = db.Pictures.Where(p => p.PictureID == id);
+
+            switch (type)
+            {
+                case "thumbnail":
+                    pictureData = await pictureQuery.Select(p => p.ThumbnailData).FirstOrDefaultAsync();
+                    break;
+                default:
+                    pictureData = await pictureQuery.Select(p => p.Data).FirstOrDefaultAsync();
+                    break;
+            }
+
+            if (pictureData == null || pictureData.Length == 0)
             {
                 return File("/Content/UserImage.png", "image/png");
             }
 
-            return File(picture.Data, "image/jpg");
+            return File(pictureData, "image/jpg");
         }
 
         protected override void Dispose(bool disposing)

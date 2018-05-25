@@ -32,17 +32,17 @@ namespace ContosoUniversityCore.Controllers
         }
 
         // GET: Courses
-        public async Task<ActionResult> Index(int? SelectedDepartment, int? studentId)
+        public async Task<ActionResult> Index(int? selectedDepartment, int? studentId)
         {
             ViewBag.StudentId = studentId;
 
             var departments = await departmentService.GetDepartmentsAsync();
-            ViewBag.SelectedDepartment = new SelectList(departments, "DepartmentID", "Name", SelectedDepartment);
+            ViewBag.SelectedDepartment = new SelectList(departments, "DepartmentID", "Name", selectedDepartment);
 
-            int departmentID = SelectedDepartment.GetValueOrDefault();
+            int departmentID = selectedDepartment.GetValueOrDefault();
 
             IQueryable<Course> courses = context.Courses
-                .Where(c => !SelectedDepartment.HasValue || c.DepartmentID == departmentID)
+                .Where(c => !selectedDepartment.HasValue || c.DepartmentID == departmentID)
                 .OrderBy(d => d.CourseID)
                 .Include(d => d.Department);
             var sql = courses.ToString();

@@ -30,7 +30,7 @@ namespace ContosoUniversityCore
             {
                 ConnectRetryCount = 5,
                 ConnectRetryInterval = 2,
-                MaxPoolSize = 500,
+                MaxPoolSize = 900,
                 MinPoolSize = 5
             };
 
